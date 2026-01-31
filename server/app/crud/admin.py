@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+import bcrypt
 
 from app.models.admin import AdminUser
-from app.core.security import verify_password
 
 
 async def get_admin_by_username(db: AsyncSession, username: str) -> AdminUser | None:
@@ -19,6 +19,11 @@ async def verify_admin_password(
     if not admin or not admin.is_active:
         return None
 
-    if verify_password(password, admin.hashed_password):
-        return admin
+    try:
+        # Try bcrypt verification (works with PostgreSQL crypt() bcrypt hashes)
+        if bcrypt.checkpw(password.encode(), admin.hashed_password.encode()):
+            return admin
+    except Exception:
+        pass
+
     return None

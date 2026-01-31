@@ -27,6 +27,9 @@ class APIKeyResponse(BaseModel):
     domain: str = Field(..., description="Domain associated with the API key")
     created_at: datetime = Field(..., description="API key creation timestamp")
     revoked: bool = Field(default=False, description="Whether the API key is revoked")
+    full_key: str | None = Field(
+        default=None, description="Full API key (only returned on creation)"
+    )
 
 
 class APIKeyListResponse(BaseModel):

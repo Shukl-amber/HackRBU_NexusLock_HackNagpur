@@ -268,11 +268,13 @@ def generate_api_key() -> tuple[str, str]:
         # Show full_key to user
         # Store hashed_key in database
     """
+    import bcrypt
+
     # Generate 32-byte (256-bit) random key
     full_key = secrets.token_urlsafe(32)
 
-    # Hash for storage
-    hashed_key = pwd_context.hash(full_key)
+    # Hash for storage using bcrypt directly
+    hashed_key = bcrypt.hashpw(full_key.encode(), bcrypt.gensalt(rounds=12)).decode()
 
     return full_key, hashed_key
 
@@ -287,4 +289,9 @@ def verify_api_key_hash(plain_key: str, hashed_key: str) -> bool:
     Returns:
         True if key is valid, False otherwise
     """
-    return pwd_context.verify(plain_key, hashed_key)
+    import bcrypt
+
+    try:
+        return bcrypt.checkpw(plain_key.encode(), hashed_key.encode())
+    except Exception:
+        return False
