@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.13.0-pg15
+    container_name: consentvault-timescaledb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: consentvault
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    networks:
+      - consentvault-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-private:
+    image: postgres:15
+    container_name: consentvault-postgres-private
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: consentvault_private
+    volumes:
+      - postgres_private_data:/var/lib/postgresql/data
+    networks:
+      - consentvault-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: consentvault-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - consentvault-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  timescaledb_data:
+    driver: local
+  postgres_private_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  consentvault-network:
+    driver: bridge
