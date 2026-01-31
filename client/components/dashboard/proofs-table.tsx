@@ -1,0 +1,1 @@
+// Active Proofs table component

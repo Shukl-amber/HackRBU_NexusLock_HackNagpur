@@ -1,0 +1,1 @@
+// Supabase mock Aadhaar authentication

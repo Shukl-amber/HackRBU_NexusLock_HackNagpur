@@ -1,0 +1,1 @@
+// Proof card display component
