@@ -19,7 +19,6 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Trim whitespace from inputs
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
@@ -34,8 +33,6 @@ export default function AuthPage() {
     }
 
     setIsLoading(true);
-    
-    console.log("Form submitted:", { mode, email: trimmedEmail, passwordLength: trimmedPassword.length });
 
     try {
       const result =
@@ -43,15 +40,12 @@ export default function AuthPage() {
           ? await login({ email: trimmedEmail, password: trimmedPassword })
           : await signup({ name: name.trim(), email: trimmedEmail, password: trimmedPassword });
 
-      console.log("Auth result:", result);
-
       if (result.success) {
         toast.success(result.message);
       } else {
         toast.error(result.message || "Authentication failed");
       }
     } catch (error) {
-      console.error("Auth error:", error);
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -66,20 +60,20 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-dark flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-           <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-             <span className="text-white font-bold text-2xl">NC</span>
-           </div>
-           <h1 className="text-2xl font-bold text-gray-900">NexusConnect</h1>
-          <p className="text-gray-500 mt-1">Secure document consent management</p>
+          <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4 glow-cyan">
+            <span className="text-white font-bold text-2xl">NC</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-100">NexusConnect</h1>
+          <p className="text-gray-400 mt-1">DPDP-Compliant Consent Management</p>
         </div>
 
         {/* Auth Card */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 text-center mb-6">
+        <div className="card-hover p-8">
+          <h2 className="text-xl font-semibold text-gray-100 text-center mb-6">
             {mode === "login" ? "Welcome back" : "Create your account"}
           </h2>
 
@@ -89,7 +83,7 @@ export default function AuthPage() {
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-300 mb-1"
                 >
                   Full Name
                 </label>
@@ -99,7 +93,7 @@ export default function AuthPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900 placeholder:text-gray-400"
+                  className="input-dark"
                   required
                 />
               </div>
@@ -109,7 +103,7 @@ export default function AuthPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-gray-300 mb-1"
               >
                 Email Address
               </label>
@@ -119,7 +113,7 @@ export default function AuthPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900 placeholder:text-gray-400"
+                className="input-dark"
                 required
               />
             </div>
@@ -128,7 +122,7 @@ export default function AuthPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-gray-300 mb-1"
               >
                 Password
               </label>
@@ -138,7 +132,7 @@ export default function AuthPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900 placeholder:text-gray-400"
+                className="input-dark"
                 required
                 minLength={6}
               />
@@ -148,7 +142,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 mt-6"
+              className="btn-primary w-full mt-6 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -165,13 +159,13 @@ export default function AuthPage() {
 
           {/* Toggle mode */}
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-400 text-sm">
               {mode === "login"
                 ? "Don't have an account?"
                 : "Already have an account?"}{" "}
               <button
                 onClick={toggleMode}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
               >
                 {mode === "login" ? "Sign up" : "Sign in"}
               </button>
@@ -179,10 +173,10 @@ export default function AuthPage() {
           </div>
         </div>
 
-         {/* Footer */}
-         <p className="text-center text-gray-400 text-sm mt-6">
-           © 2025 NexusConnect. All rights reserved.
-         </p>
+        {/* Footer */}
+        <p className="text-center text-gray-500 text-sm mt-6">
+          © 2025 NexusConnect. All rights reserved.
+        </p>
       </div>
     </div>
   );
