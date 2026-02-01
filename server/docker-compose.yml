@@ -1,0 +1,84 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.13.0-pg15
+    container_name: nexus-connect-timescaledb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: nexus_connect
+    volumes:
+      - ./docker_data/timescaledb:/var/lib/postgresql/data
+    networks:
+      - nexus-connect-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-private:
+    image: postgres:15
+    container_name: nexus-connect-postgres-private
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: nexus_connect_private
+    volumes:
+      - ./docker_data/postgres_private:/var/lib/postgresql/data
+    networks:
+      - nexus-connect-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexus-connect-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker_data/redis:/data
+    networks:
+      - nexus-connect-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  server:
+    build: .
+    container_name: nexus-connect-server
+    ports:
+      - "8000:8000"
+    environment:
+      - PUBLIC_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@timescaledb:5432/nexus_connect
+      - PRIVATE_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-private:5432/nexus_connect_private
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-min-32-characters-long-here}
+      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY:-your-master-key-min-32-characters-long-here}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-change-this-password}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      postgres-private:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nexus-connect-network
+    restart: unless-stopped
+
+networks:
+  nexus-connect-network:
+    driver: bridge
