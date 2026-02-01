@@ -704,35 +704,3 @@ server/
 ├── alembic.ini                # Alembic configuration
 └── README.md                  # This file
 ```
-
----
-
-## License
-
-[Add your license here]
-
----
-
-## Contributors
-
-[Add contributor information]
-
----
-
-## Support
-
-For issues or questions:
-- **Email:** [support email]
-- **GitHub Issues:** [repository issues URL]
-- **Documentation:** This README + inline code comments
-
----
-
-## Changelog
-
-### v1.0.0 (2025-01-30)
-- Initial release with all core features
-- Dual-database architecture with TimescaleDB and PostgreSQL
-- ZKP verification, encryption, revocation, and audit logging
-- Admin API key management
-- Production-ready health checks and error handling
