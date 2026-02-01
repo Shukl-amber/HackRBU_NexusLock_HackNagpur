@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
         <div className="text-white text-lg flex items-center gap-3">
-          <span className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <span className="w-6 h-6 border-2 border-[#00d4ff] border-t-transparent rounded-full animate-spin" />
           Loading...
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-dark">
-      <nav className="bg-gray-900/50 border-b border-gray-800">
+      <nav className="bg-[#0a0a0a]/80 border-b border-[#222222]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
@@ -103,14 +103,14 @@ export default function AdminDashboardPage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-gray-100 font-semibold">Admin Dashboard</h1>
-              <p className="text-gray-400 text-sm">NexusConnect Administration</p>
+              <h1 className="text-white font-semibold">Admin Dashboard</h1>
+              <p className="text-[#666666] text-sm">NexusConnect Administration</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-gray-100 text-sm font-medium">{user?.username}</p>
-              <p className="text-gray-400 text-xs capitalize">{user?.role}</p>
+              <p className="text-white text-sm font-medium">{user?.username}</p>
+              <p className="text-[#666666] text-xs capitalize">{user?.role}</p>
             </div>
             <button
               onClick={handleLogout}
@@ -127,26 +127,26 @@ export default function AdminDashboardPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-100 mb-2">API Key Management</h2>
-          <p className="text-gray-400">Manage API keys for third-party integrations</p>
+          <h2 className="text-2xl font-bold text-white mb-2">API Key Management</h2>
+          <p className="text-[#666666]">Manage API keys for third-party integrations</p>
         </div>
 
         {createdKey && (
-          <div className="mb-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+          <div className="mb-6 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-xl p-6">
             <div className="flex items-start gap-3 mb-3">
-              <svg className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-[#00ff88] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div className="flex-1">
-                <h3 className="text-emerald-400 font-semibold mb-1">API Key Created!</h3>
-                <p className="text-gray-400 text-sm mb-3">
+                <h3 className="text-[#00ff88] font-semibold mb-1">API Key Created!</h3>
+                <p className="text-[#666666] text-sm mb-3">
                   Save this key securely. You won&apos;t see it again.
                 </p>
-                <div className="bg-gray-900/50 rounded-lg p-3 flex items-center gap-2">
-                  <code className="text-emerald-400 text-sm flex-1 font-mono break-all">{createdKey}</code>
+                <div className="bg-[#0a0a0a] rounded-lg p-3 flex items-center gap-2">
+                  <code className="text-[#00ff88] text-sm flex-1 font-mono break-all">{createdKey}</code>
                   <button
                     onClick={() => copyToClipboard(createdKey)}
-                    className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-100 rounded text-sm transition-colors flex-shrink-0"
+                    className="px-3 py-1 bg-[#1a1a1a] hover:bg-[#222222] text-white rounded text-sm transition-colors flex-shrink-0"
                   >
                     Copy
                   </button>
@@ -154,7 +154,7 @@ export default function AdminDashboardPage() {
               </div>
               <button
                 onClick={() => setCreatedKey(null)}
-                className="text-gray-400 hover:text-gray-200 transition-colors"
+                className="text-[#666666] hover:text-white transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -177,14 +177,14 @@ export default function AdminDashboardPage() {
         ) : (
           <div className="mb-6 card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-gray-100 font-semibold text-lg">Create New API Key</h3>
+              <h3 className="text-white font-semibold text-lg">Create New API Key</h3>
               <button
                 onClick={() => {
                   setShowCreateForm(false);
                   setNewKeyName("");
                   setNewKeyDomain("");
                 }}
-                className="text-gray-400 hover:text-gray-200 transition-colors"
+                className="text-[#666666] hover:text-white transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -193,7 +193,7 @@ export default function AdminDashboardPage() {
             </div>
             <form onSubmit={handleCreateApiKey} className="space-y-4">
               <div>
-                <label htmlFor="keyName" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="keyName" className="block text-sm font-medium text-[#a0a0a0] mb-2">
                   Key Name
                 </label>
                 <input
@@ -207,7 +207,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
               <div>
-                <label htmlFor="keyDomain" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="keyDomain" className="block text-sm font-medium text-[#a0a0a0] mb-2">
                   Domain
                 </label>
                 <input
@@ -239,31 +239,31 @@ export default function AdminDashboardPage() {
         )}
 
         <div className="card overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-800">
-            <h3 className="text-gray-100 font-semibold">Existing API Keys</h3>
+          <div className="px-6 py-4 border-b border-[#222222]">
+            <h3 className="text-white font-semibold">Existing API Keys</h3>
           </div>
           
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-gray-400">Loading...</p>
+              <div className="w-8 h-8 border-2 border-[#00d4ff] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-[#666666]">Loading...</p>
             </div>
           ) : apiKeys.length === 0 ? (
             <div className="p-8 text-center">
-              <svg className="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-12 h-12 text-[#333333] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
-              <p className="text-gray-400 mb-1">No API keys found</p>
-              <p className="text-gray-500 text-sm">Create your first API key</p>
+              <p className="text-[#666666] mb-1">No API keys found</p>
+              <p className="text-[#444444] text-sm">Create your first API key</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-[#222222]">
               {apiKeys.map((key) => (
-                <div key={key.id} className="px-6 py-4 hover:bg-gray-800/30 transition-colors">
+                <div key={key.id} className="px-6 py-4 hover:bg-[#1a1a1a]/50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-gray-100 font-medium">{key.name}</h4>
+                        <h4 className="text-white font-medium">{key.name}</h4>
                         <span
                           className={`badge ${
                             key.is_active
@@ -275,13 +275,13 @@ export default function AdminDashboardPage() {
                         </span>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-gray-400 text-sm flex items-center gap-2">
+                        <p className="text-[#666666] text-sm flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                           </svg>
                           {key.domain}
                         </p>
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-[#444444] text-sm">
                           Created {new Date(key.created_at).toLocaleDateString()}
                         </p>
                       </div>
