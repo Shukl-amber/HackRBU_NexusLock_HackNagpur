@@ -1,10 +1,12 @@
 {
   "active_plan": "/home/viv/Projects/gdg_nagpur_hackathon/HackRBU_NexusLock_HackNagpur/.sisyphus/plans/frontend-integration.md",
   "started_at": "2026-02-01T04:54:56.648Z",
-  "completed_at": "2026-02-01T05:35:00.000Z",
+  "completed_at": "2026-02-01T05:40:00.000Z",
   "session_ids": ["ses_3e87e657cffegVYf5Q1UwcWxj3"],
   "plan_name": "frontend-integration",
   "status": "completed",
   "tasks_completed": 9,
-  "tasks_total": 9
+  "tasks_total": 9,
+  "checkboxes_completed": 15,
+  "checkboxes_total": 15
 }
