@@ -70,10 +70,10 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">CV</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">ConsentVault</h1>
+           <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+             <span className="text-white font-bold text-2xl">NC</span>
+           </div>
+           <h1 className="text-2xl font-bold text-gray-900">NexusConnect</h1>
           <p className="text-gray-500 mt-1">Secure document consent management</p>
         </div>
 
@@ -179,10 +179,10 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-gray-400 text-sm mt-6">
-          © 2025 ConsentVault. All rights reserved.
-        </p>
+         {/* Footer */}
+         <p className="text-center text-gray-400 text-sm mt-6">
+           © 2025 NexusConnect. All rights reserved.
+         </p>
       </div>
     </div>
   );

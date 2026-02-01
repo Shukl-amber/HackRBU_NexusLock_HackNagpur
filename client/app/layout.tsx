@@ -6,7 +6,7 @@ import { Providers } from "@/lib/providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ConsentVault",
+  title: "NexusConnect",
   description: "Secure document consent management",
 };
 

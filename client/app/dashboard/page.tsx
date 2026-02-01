@@ -108,11 +108,11 @@ export default function DashboardPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    const csv = exportToCSV(proofs);
-    downloadCSV(csv, `consent-vault-proofs-${Date.now()}.csv`);
-    toast.success("Proofs exported to CSV");
-  };
+   const handleExportCSV = () => {
+     const csv = exportToCSV(proofs);
+     downloadCSV(csv, `nexus-connect-proofs-${Date.now()}.csv`);
+     toast.success("Proofs exported to CSV");
+   };
 
   const activeProofs = proofs.filter((p) => p.status === "active");
 
@@ -137,14 +137,14 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Left: Logo + Title */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">CV</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  ConsentVault Dashboard
-                </h1>
+             <div className="flex items-center gap-3">
+               <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                 <span className="text-white font-bold text-lg">NC</span>
+               </div>
+               <div>
+                 <h1 className="text-xl font-semibold text-gray-900">
+                   NexusConnect Dashboard
+                 </h1>
                 <p className="text-xs text-gray-500">
                   Last sync: {formatTime(lastSync.toISOString())}
                 </p>

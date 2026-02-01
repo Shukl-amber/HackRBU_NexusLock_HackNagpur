@@ -3,8 +3,8 @@
 import axios from "axios";
 import { User, LoginRequest, SignupRequest, AuthResponse } from "@/types";
 
-const TOKEN_KEY = "consent_vault_token";
-const USER_KEY = "consent_vault_user";
+const TOKEN_KEY = "nexus_connect_token";
+const USER_KEY = "nexus_connect_user";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // Token management

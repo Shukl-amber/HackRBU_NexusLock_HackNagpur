@@ -242,9 +242,9 @@ export default function UploadPage() {
             >
               ← Back
             </button>
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">CV</span>
-            </div>
+             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+               <span className="text-white font-bold text-lg">NC</span>
+             </div>
             <h1 className="text-xl font-semibold text-gray-900">
               Upload Documents
             </h1>
