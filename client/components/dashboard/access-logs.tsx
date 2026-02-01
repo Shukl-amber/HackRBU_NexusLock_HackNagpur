@@ -1,1 +1,0 @@
-// Recent access logs component

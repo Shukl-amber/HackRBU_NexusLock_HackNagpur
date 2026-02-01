@@ -1,1 +1,0 @@
-// Realtime updates notifier component
