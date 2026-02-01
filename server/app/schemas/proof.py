@@ -16,6 +16,12 @@ class ProofCreate(BaseModel):
         ..., description="Zero-knowledge proof containing pi_a, pi_b, pi_c"
     )
     pub_signals: list[Any] = Field(..., description="Public signals of the proof")
+    purpose: Optional[str] = Field(
+        default=None, description="Purpose of the proof document"
+    )
+    requester: Optional[str] = Field(
+        default=None, description="Entity requesting the proof"
+    )
 
 
 class ProofResponse(BaseModel):
@@ -26,6 +32,10 @@ class ProofResponse(BaseModel):
     expiry: datetime = Field(..., description="Proof expiry date")
     revoked: bool = Field(default=False, description="Whether the proof is revoked")
     created_at: datetime = Field(..., description="Proof creation timestamp")
+    purpose: Optional[str] = Field(default=None, description="Purpose of the proof")
+    requester: Optional[str] = Field(
+        default=None, description="Entity requesting the proof"
+    )
 
 
 class ProofVerifyResponse(BaseModel):

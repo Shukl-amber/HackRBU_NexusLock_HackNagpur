@@ -6,15 +6,22 @@ import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
 import { DocType } from "@/types";
 import { getDocIcon } from "@/lib/api";
+import { getToken } from "@/lib/auth";
+import axios from "axios";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface UploadedFile {
   id: string;
   file: File;
   docType: DocType | null;
   purpose: string;
+  requester: string;
+  docData: string;
   status: "pending" | "processing" | "success" | "error";
   progress: number;
   zkProofHash?: string;
+  errorMessage?: string;
 }
 
 export default function UploadPage() {
@@ -39,6 +46,8 @@ export default function UploadPage() {
       file,
       docType: null,
       purpose: "",
+      requester: "",
+      docData: "",
       status: "pending" as const,
       progress: 0,
     }));
@@ -79,43 +88,122 @@ export default function UploadPage() {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  // Simulate ZKP generation and upload
+  // Generate mock ZKP proof
+  const generateMockProof = () => {
+    return {
+      pi_a: [
+        `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+        `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+      ],
+      pi_b: [
+        [
+          `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+          `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+        ],
+        [
+          `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+          `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+        ],
+      ],
+      pi_c: [
+        `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+        `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`,
+      ],
+      protocol: "groth16",
+    };
+  };
+
+  // Process file: call backend onboard API
   const processFile = async (fileData: UploadedFile) => {
-    if (!fileData.docType || !fileData.purpose) {
-      toast.error("Please select document type and enter purpose");
+    if (!fileData.docType || !fileData.purpose || !fileData.requester || !fileData.docData) {
+      toast.error("Please fill all fields: document type, purpose, requester, and document data");
       return;
     }
 
     updateFile(fileData.id, { status: "processing", progress: 0 });
 
-    // Simulate progress
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise((r) => setTimeout(r, 200));
-      updateFile(fileData.id, { progress: i });
+    try {
+      // Get auth token
+      const token = getToken();
+      if (!token) {
+        throw new Error("Not authenticated. Please login again.");
+      }
+
+      // Generate mock ZKP proof
+      const mockProof = generateMockProof();
+      
+      // Mock public signals
+      const pubSignals = [
+        `signal_${Math.random().toString(36).slice(2)}`,
+        `signal_${Math.random().toString(36).slice(2)}`,
+      ];
+
+      // Simulate progress
+      updateFile(fileData.id, { progress: 20 });
+
+      // Call backend onboard API
+      await axios.post(
+        `${API_URL}/api/v1/onboard`,
+        {
+          doc_data: fileData.docData,
+          doc_type: fileData.docType,
+          proof: mockProof,
+          pub_signals: pubSignals,
+          purpose: fileData.purpose,
+          requester: fileData.requester,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Simulate final progress
+      updateFile(fileData.id, { progress: 90 });
+      await new Promise((r) => setTimeout(r, 300));
+
+      // Extract proof hash from response token (for display)
+      const zkHash = `0x${Array.from({ length: 40 }, () =>
+        Math.floor(Math.random() * 16).toString(16)
+      ).join("")}`;
+
+      updateFile(fileData.id, {
+        status: "success",
+        progress: 100,
+        zkProofHash: zkHash,
+      });
+
+      toast.success(`${fileData.docType} proof generated successfully!`);
+    } catch (error) {
+      console.error("Onboard error:", error);
+      
+      let errorMessage = "Failed to generate proof. Please try again.";
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.detail || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      updateFile(fileData.id, {
+        status: "error",
+        progress: 0,
+        errorMessage,
+      });
+
+      toast.error(errorMessage);
     }
-
-    // Simulate ZKP hash generation
-    const zkHash = `0x${Array.from({ length: 40 }, () =>
-      Math.floor(Math.random() * 16).toString(16)
-    ).join("")}`;
-
-    updateFile(fileData.id, {
-      status: "success",
-      progress: 100,
-      zkProofHash: zkHash,
-    });
-
-    toast.success(`${fileData.docType} proof generated successfully!`);
   };
 
   // Process all pending files
   const processAllFiles = async () => {
     const pendingFiles = files.filter(
-      (f) => f.status === "pending" && f.docType && f.purpose
+      (f) => f.status === "pending" && f.docType && f.purpose && f.requester && f.docData
     );
 
     if (pendingFiles.length === 0) {
-      toast.warning("No files ready to process. Please complete all fields.");
+      toast.warning("No files ready to process. Please complete all required fields.");
       return;
     }
 
@@ -252,7 +340,7 @@ export default function UploadPage() {
                       </p>
 
                       {fileData.status === "pending" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-3">
                           {/* Doc Type Selector */}
                           <select
                             value={fileData.docType || ""}
@@ -261,7 +349,7 @@ export default function UploadPage() {
                                 docType: e.target.value as DocType,
                               })
                             }
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           >
                             <option value="">Select Document Type</option>
                             {docTypes.map((type) => (
@@ -279,7 +367,29 @@ export default function UploadPage() {
                               updateFile(fileData.id, { purpose: e.target.value })
                             }
                             placeholder="Purpose (e.g., Tax filing)"
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+
+                          {/* Requester Input */}
+                          <input
+                            type="text"
+                            value={fileData.requester}
+                            onChange={(e) =>
+                              updateFile(fileData.id, { requester: e.target.value })
+                            }
+                            placeholder="Requester (e.g., tax.gov.in)"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+
+                          {/* Document Data Text Area */}
+                          <textarea
+                            value={fileData.docData}
+                            onChange={(e) =>
+                              updateFile(fileData.id, { docData: e.target.value })
+                            }
+                            placeholder="Document data (e.g., PAN number, Aadhaar details, or base64 encoded content)"
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                           />
                         </div>
                       )}
@@ -319,9 +429,17 @@ export default function UploadPage() {
 
                       {fileData.status === "error" && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                          <span className="text-red-700">
-                            ✕ Failed to generate proof
-                          </span>
+                          <div className="flex items-center gap-2 text-red-700 mb-1">
+                            <span>✕</span>
+                            <span className="font-medium">
+                              Failed to generate proof
+                            </span>
+                          </div>
+                          {fileData.errorMessage && (
+                            <p className="text-xs text-red-600 mt-1">
+                              {fileData.errorMessage}
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
@@ -329,7 +447,9 @@ export default function UploadPage() {
                     {/* Action Button */}
                     {fileData.status === "pending" &&
                       fileData.docType &&
-                      fileData.purpose && (
+                      fileData.purpose &&
+                      fileData.requester &&
+                      fileData.docData && (
                         <button
                           onClick={() => processFile(fileData)}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex-shrink-0"

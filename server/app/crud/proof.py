@@ -14,6 +14,8 @@ async def create_proof(
     proof: bytes,
     pub_signals: dict,
     expiry: datetime,
+    purpose: str | None = None,
+    requester: str | None = None,
 ) -> Proof:
     """Create a new proof record."""
     proof_obj = Proof(
@@ -23,6 +25,8 @@ async def create_proof(
         pub_signals=pub_signals,
         expiry=expiry,
         revoked=False,
+        purpose=purpose,
+        requester=requester,
     )
     db.add(proof_obj)
     await db.commit()

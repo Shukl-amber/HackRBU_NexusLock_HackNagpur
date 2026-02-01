@@ -1,131 +1,110 @@
 // API functions for dashboard data
 
+import axios from "axios";
 import { Proof, AccessLog, PendingRequest, DocType } from "@/types";
+import { getToken } from "./auth";
 
-const MOCK_DELAY = 300;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-// Mock data
-const mockProofs: Proof[] = [
-  {
-    id: "proof_1",
-    docType: "PAN",
-    purpose: "Tax filing verification",
-    requester: "tax.gov.in",
-    expires: new Date(Date.now() + 86400000 * 2).toISOString(), // 2 days
-    status: "active",
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    zkProofHash: "0x7f8a9b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a",
-  },
-  {
-    id: "proof_2",
-    docType: "Aadhaar",
-    purpose: "Health card application",
-    requester: "health.gov.in",
-    expires: new Date(Date.now() + 86400000).toISOString(), // 1 day
-    status: "active",
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-    zkProofHash: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
-  },
-  {
-    id: "proof_3",
-    docType: "Passport",
-    purpose: "KYC verification",
-    requester: "bank.example.com",
-    expires: new Date(Date.now() - 86400000).toISOString(), // Expired
-    status: "expired",
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    zkProofHash: "0x2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
-  },
-];
-
-const mockAccessLogs: AccessLog[] = [
-  {
-    id: "log_1",
-    domain: "tax.gov.in",
-    action: "verified",
-    docType: "PAN",
-    timestamp: new Date(Date.now() - 300000).toISOString(), // 5 min ago
-    details: { verifier: "Income Tax Department", status: "success" },
-  },
-  {
-    id: "log_2",
-    domain: "health.gov.in",
-    action: "verified",
-    docType: "Aadhaar",
-    timestamp: new Date(Date.now() - 900000).toISOString(), // 15 min ago
-    details: { verifier: "Health Ministry", status: "success" },
-  },
-  {
-    id: "log_3",
-    domain: "digilocker.gov.in",
-    action: "onboard",
-    docType: "Aadhaar",
-    timestamp: new Date(Date.now() - 1200000).toISOString(), // 20 min ago
-    details: { action: "Document onboarded", hash: "0x..." },
-  },
-  {
-    id: "log_4",
-    domain: "bank.example.com",
-    action: "revoked",
-    docType: "Passport",
-    timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    details: { reason: "User initiated revocation" },
-  },
-  {
-    id: "log_5",
-    domain: "insurance.co.in",
-    action: "requested",
-    docType: "PAN",
-    timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-    details: { purpose: "Insurance claim processing" },
-  },
-];
-
-const mockPendingRequests: PendingRequest[] = [];
+// Helper to get authorization headers
+const getAuthHeaders = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // API functions
 export async function getProofs(): Promise<Proof[]> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
-  return [...mockProofs];
+  try {
+    const response = await axios.get(`${API_URL}/api/v1/dashboard`, {
+      headers: getAuthHeaders(),
+    });
+
+    return response.data.proofs.map((proof: any) => ({
+      id: proof.id,
+      docType: proof.docType as DocType,
+      purpose: proof.purpose,
+      requester: proof.requester,
+      expires: proof.expires,
+      status: proof.status,
+      createdAt: proof.createdAt,
+      zkProofHash: proof.zkProofHash,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch proofs:", error);
+    throw new Error("Failed to fetch proofs");
+  }
 }
 
 export async function getAccessLogs(
   filter: "all" | "today" | "week" = "all"
 ): Promise<AccessLog[]> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
+  try {
+    const response = await axios.get(`${API_URL}/api/v1/dashboard`, {
+      headers: getAuthHeaders(),
+    });
 
-  const now = Date.now();
-  const dayMs = 86400000;
+    let logs = response.data.logs.map((log: any) => ({
+      id: log.proof_id || `log_${Date.now()}`,
+      domain: log.details?.requesting_domain || "Unknown",
+      action: log.action as AccessLog["action"],
+      docType: (log.details?.doc_type || "PAN") as DocType,
+      timestamp: log.timestamp,
+      details: log.details || {},
+    }));
 
-  return mockAccessLogs.filter((log) => {
-    const logTime = new Date(log.timestamp).getTime();
-    if (filter === "today") {
-      return now - logTime < dayMs;
+    // Filter logs by timeframe
+    const now = Date.now();
+    const dayMs = 86400000;
+
+    if (filter !== "all") {
+      logs = logs.filter((log: AccessLog) => {
+        const logTime = new Date(log.timestamp).getTime();
+        if (filter === "today") {
+          return now - logTime < dayMs;
+        }
+        if (filter === "week") {
+          return now - logTime < dayMs * 7;
+        }
+        return true;
+      });
     }
-    if (filter === "week") {
-      return now - logTime < dayMs * 7;
-    }
-    return true;
-  });
+
+    return logs;
+  } catch (error) {
+    console.error("Failed to fetch access logs:", error);
+    throw new Error("Failed to fetch access logs");
+  }
 }
 
 export async function getPendingRequests(): Promise<PendingRequest[]> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
-  return [...mockPendingRequests];
+  // No pending requests endpoint yet - return empty array
+  return [];
 }
 
 export async function revokeProof(
   proofId: string
 ): Promise<{ success: boolean; message: string }> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
+  try {
+    await axios.post(
+      `${API_URL}/api/v1/revoke`,
+      null,
+      {
+        headers: getAuthHeaders(),
+        params: { proof_id: proofId },
+      }
+    );
 
-  const proof = mockProofs.find((p) => p.id === proofId);
-  if (!proof) {
-    return { success: false, message: "Proof not found" };
+    return { success: true, message: "Proof revoked successfully" };
+  } catch (error) {
+    console.error("Failed to revoke proof:", error);
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response.data.detail || "Failed to revoke proof",
+      };
+    }
+    return { success: false, message: "Failed to revoke proof" };
   }
-
-  proof.status = "revoked";
-  return { success: true, message: "Proof revoked successfully" };
 }
 
 export async function revokeAllProofs(): Promise<{
@@ -133,21 +112,33 @@ export async function revokeAllProofs(): Promise<{
   message: string;
   count: number;
 }> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
+  try {
+    // Get all active proofs
+    const proofs = await getProofs();
+    const activeProofs = proofs.filter((p) => p.status === "active");
 
-  let count = 0;
-  mockProofs.forEach((proof) => {
-    if (proof.status === "active") {
-      proof.status = "revoked";
-      count++;
+    // Revoke each one
+    let count = 0;
+    for (const proof of activeProofs) {
+      const result = await revokeProof(proof.id);
+      if (result.success) {
+        count++;
+      }
     }
-  });
 
-  return {
-    success: true,
-    message: `Revoked ${count} active proofs`,
-    count,
-  };
+    return {
+      success: true,
+      message: `Revoked ${count} active proofs`,
+      count,
+    };
+  } catch (error) {
+    console.error("Failed to revoke all proofs:", error);
+    return {
+      success: false,
+      message: "Failed to revoke all proofs",
+      count: 0,
+    };
+  }
 }
 
 export function getDocIcon(docType: DocType): string {

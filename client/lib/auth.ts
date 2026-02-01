@@ -1,9 +1,11 @@
 // JWT Authentication utilities
 
+import axios from "axios";
 import { User, LoginRequest, SignupRequest, AuthResponse } from "@/types";
 
 const TOKEN_KEY = "consent_vault_token";
 const USER_KEY = "consent_vault_user";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // Token management
 export const getToken = (): string | null => {
@@ -49,105 +51,92 @@ export const clearAuth = (): void => {
   removeStoredUser();
 };
 
-// Mock API calls (replace with real API endpoints)
-const MOCK_DELAY = 800;
-
-// Simulated user database (for demo purposes)
-const mockUsers: Map<string, { user: User; password: string }> = new Map();
-
 export const loginUser = async (data: LoginRequest): Promise<AuthResponse> => {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
-
-  // Check if user exists in mock database
-  const stored = mockUsers.get(data.email);
-  
-  if (!stored) {
+  try {
+    const response = await axios.post(`${API_URL}/api/v1/auth/login`, data);
+    
+    const { access_token, user } = response.data;
+    
+    setToken(access_token);
+    setStoredUser(user);
+    
+    return {
+      success: true,
+      message: "Login successful!",
+      user,
+      token: access_token,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response.data.detail || "Invalid credentials. Please try again.",
+      };
+    }
     return {
       success: false,
-      message: "User not found. Please sign up first.",
+      message: "Network error. Please check your connection.",
     };
   }
-
-  if (stored.password !== data.password) {
-    return {
-      success: false,
-      message: "Invalid password. Please try again.",
-    };
-  }
-
-  // Generate mock JWT token
-  const token = `jwt_${btoa(JSON.stringify({ userId: stored.user.id, email: data.email, exp: Date.now() + 86400000 }))}`;
-
-  return {
-    success: true,
-    message: "Login successful!",
-    user: stored.user,
-    token,
-  };
 };
 
 export const signupUser = async (data: SignupRequest): Promise<AuthResponse> => {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
-
-  // Check if user already exists
-  if (mockUsers.has(data.email)) {
+  try {
+    const response = await axios.post(`${API_URL}/api/v1/auth/signup`, data);
+    
+    const { access_token, user } = response.data;
+    
+    // Store token and user in localStorage
+    setToken(access_token);
+    setStoredUser(user);
+    
+    return {
+      success: true,
+      message: "Account created successfully!",
+      user,
+      token: access_token,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response.data.detail || "Signup failed. Please try again.",
+      };
+    }
     return {
       success: false,
-      message: "User already exists. Please login instead.",
+      message: "Network error. Please check your connection.",
     };
   }
-
-  // Create new user
-  const newUser: User = {
-    id: `user_${Date.now()}`,
-    email: data.email,
-    name: data.name,
-    createdAt: new Date().toISOString(),
-  };
-
-  // Store in mock database
-  mockUsers.set(data.email, { user: newUser, password: data.password });
-
-  // Generate mock JWT token
-  const token = `jwt_${btoa(JSON.stringify({ userId: newUser.id, email: data.email, exp: Date.now() + 86400000 }))}`;
-
-  return {
-    success: true,
-    message: "Account created successfully!",
-    user: newUser,
-    token,
-  };
 };
 
 export const validateToken = async (): Promise<AuthResponse> => {
   const token = getToken();
-  const user = getStoredUser();
-
-  if (!token || !user) {
+  
+  if (!token) {
     return {
       success: false,
       message: "No valid session found.",
     };
   }
 
-  // In a real app, validate token with backend
-  // For now, just check if token format is valid
   try {
-    const payload = JSON.parse(atob(token.replace("jwt_", "")));
-    if (payload.exp < Date.now()) {
-      clearAuth();
-      return {
-        success: false,
-        message: "Session expired. Please login again.",
-      };
-    }
+    const response = await axios.get(`${API_URL}/api/v1/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    const user = response.data;
+    setStoredUser(user);
+    
     return {
       success: true,
       message: "Session valid.",
       user,
       token,
     };
-  } catch {
+  } catch (error) {
     clearAuth();
     return {
       success: false,

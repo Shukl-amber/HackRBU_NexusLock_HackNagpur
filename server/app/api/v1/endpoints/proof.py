@@ -31,6 +31,7 @@ router = APIRouter()
 async def onboard(
     data: ProofCreate,
     request: Request,
+    user_id: uuid.UUID = Depends(get_current_user),
     public_db: AsyncSession = Depends(get_public_db),
     private_db: AsyncSession = Depends(get_private_db),
 ):
@@ -38,7 +39,7 @@ async def onboard(
 
     This endpoint handles the complete onboarding flow:
     1. Verifies the ZKP proof validity
-    2. Generates a unique user_id
+    2. Uses authenticated user's user_id
     3. Encrypts the document data
     4. Stores proof in public DB and encrypted doc in private DB
     5. Creates audit log entry
@@ -47,6 +48,7 @@ async def onboard(
     Args:
         data: ProofCreate schema with doc_data, doc_type, proof, pub_signals
         request: FastAPI request object (for metadata extraction)
+        user_id: Authenticated user ID from JWT token
         public_db: Public database session
         private_db: Private database session
 
@@ -65,9 +67,6 @@ async def onboard(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid ZKP proof: {zkp_result.get('reason', 'Unknown error')}",
         )
-
-    # Generate user_id
-    user_id = uuid.uuid4()
 
     # Encrypt document
     encrypted_doc, salt = encrypt_document(data.doc_data.encode(), str(user_id))
@@ -320,20 +319,36 @@ async def dashboard(
         - proofs: List of proof objects with metadata
         - logs: List of log entries with timestamps and details
     """
+    import hashlib
+    from datetime import datetime, timezone
+
     # Get proofs
     proofs = await proof_crud.get_proofs_by_user(public_db, user_id)
 
     # Get logs
     logs = await log_crud.get_logs_by_user(public_db, user_id, limit=100)
 
+    def get_proof_status(proof):
+        if proof.revoked:
+            return "revoked"
+        if proof.expiry < datetime.now(timezone.utc):
+            return "expired"
+        return "active"
+
+    def get_zk_proof_hash(proof_blob):
+        return hashlib.sha256(proof_blob).hexdigest()[:40] if proof_blob else None
+
     return {
         "proofs": [
             {
-                "proof_id": str(p.id),
-                "doc_type": p.doc_type,
-                "expiry": p.expiry.isoformat(),
-                "revoked": p.revoked,
-                "created_at": p.created_at.isoformat(),
+                "id": str(p.id),
+                "docType": p.doc_type,
+                "purpose": p.purpose or "Document verification",
+                "requester": p.requester or "Self",
+                "expires": p.expiry.isoformat(),
+                "status": get_proof_status(p),
+                "createdAt": p.created_at.isoformat(),
+                "zkProofHash": get_zk_proof_hash(p.proof),
             }
             for p in proofs
         ],

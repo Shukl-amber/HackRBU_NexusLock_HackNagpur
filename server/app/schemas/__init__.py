@@ -35,6 +35,14 @@ from .admin import (
     AdminTokenResponse,
 )
 
+# User schemas
+from .user import (
+    UserCreate,
+    UserLogin,
+    UserResponse,
+    AuthResponse,
+)
+
 # Common schemas
 from .common import (
     ErrorResponse,
@@ -62,6 +70,11 @@ __all__ = [
     # Admin
     "AdminLogin",
     "AdminTokenResponse",
+    # User
+    "UserCreate",
+    "UserLogin",
+    "UserResponse",
+    "AuthResponse",
     # Common
     "HealthResponse",
     "ErrorResponse",

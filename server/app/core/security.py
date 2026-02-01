@@ -4,13 +4,13 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Any
 
+import bcrypt
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
 
@@ -18,8 +18,6 @@ from app.core.config import settings
 # ============================================================================
 # PASSWORD HASHING
 # ============================================================================
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
@@ -31,7 +29,10 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password string
     """
-    return pwd_context.hash(password)
+    # bcrypt has a 72-byte limit, truncate if necessary
+    password_bytes = password.encode("utf-8")[:72]
+    hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -44,7 +45,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if password matches, False otherwise
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    # bcrypt has a 72-byte limit, truncate if necessary
+    password_bytes = plain_password.encode("utf-8")[:72]
+    hashed_bytes = hashed_password.encode("utf-8")
+    return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 
 # ============================================================================

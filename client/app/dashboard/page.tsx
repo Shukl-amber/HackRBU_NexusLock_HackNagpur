@@ -50,8 +50,9 @@ export default function DashboardPage() {
       setAccessLogs(logsData);
       setPendingRequests(requestsData);
       setLastSync(new Date());
-    } catch {
-      toast.error("Failed to fetch dashboard data");
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+      toast.error("Failed to fetch dashboard data. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -73,27 +74,37 @@ export default function DashboardPage() {
 
   // Handlers
   const handleRevoke = async (proofId: string) => {
-    const result = await revokeProof(proofId);
-    if (result.success) {
-      setProofs((prev) =>
-        prev.map((p) => (p.id === proofId ? { ...p, status: "revoked" } : p))
-      );
-      toast.success("Proof revoked successfully");
-    } else {
-      toast.error(result.message);
+    try {
+      const result = await revokeProof(proofId);
+      if (result.success) {
+        setProofs((prev) =>
+          prev.map((p) => (p.id === proofId ? { ...p, status: "revoked" } : p))
+        );
+        toast.success("Proof revoked successfully");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Failed to revoke proof:", error);
+      toast.error("Failed to revoke proof. Please try again.");
     }
   };
 
   const handleRevokeAll = async () => {
     if (!confirm("Are you sure you want to revoke all active proofs?")) return;
-    const result = await revokeAllProofs();
-    if (result.success) {
-      setProofs((prev) =>
-        prev.map((p) => (p.status === "active" ? { ...p, status: "revoked" } : p))
-      );
-      toast.success(result.message);
-    } else {
-      toast.error("Failed to revoke proofs");
+    try {
+      const result = await revokeAllProofs();
+      if (result.success) {
+        setProofs((prev) =>
+          prev.map((p) => (p.status === "active" ? { ...p, status: "revoked" } : p))
+        );
+        toast.success(result.message);
+      } else {
+        toast.error("Failed to revoke proofs");
+      }
+    } catch (error) {
+      console.error("Failed to revoke all proofs:", error);
+      toast.error("Failed to revoke all proofs. Please try again.");
     }
   };
 
