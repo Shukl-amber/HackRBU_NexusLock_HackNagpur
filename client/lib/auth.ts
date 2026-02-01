@@ -10,11 +10,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 // Token management
 export const getToken = (): string | null => {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  console.log("getToken called, token exists:", !!token);
+  return token;
 };
 
 export const setToken = (token: string): void => {
   if (typeof window === "undefined") return;
+  console.log("setToken called, storing token");
   localStorage.setItem(TOKEN_KEY, token);
 };
 

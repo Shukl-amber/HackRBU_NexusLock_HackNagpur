@@ -9,6 +9,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 // Helper to get authorization headers
 const getAuthHeaders = () => {
   const token = getToken();
+  console.log("getAuthHeaders - token exists:", !!token);
+  if (!token) {
+    console.warn("No token found! User may not be authenticated.");
+  }
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
