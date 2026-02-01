@@ -19,30 +19,39 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    // Trim whitespace from inputs
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
       toast.error("Please fill in all fields");
       return;
     }
 
-    if (mode === "signup" && !name) {
+    if (mode === "signup" && !name.trim()) {
       toast.error("Please enter your name");
       return;
     }
 
     setIsLoading(true);
+    
+    console.log("Form submitted:", { mode, email: trimmedEmail, passwordLength: trimmedPassword.length });
 
     try {
       const result =
         mode === "login"
-          ? await login({ email, password })
-          : await signup({ name, email, password });
+          ? await login({ email: trimmedEmail, password: trimmedPassword })
+          : await signup({ name: name.trim(), email: trimmedEmail, password: trimmedPassword });
+
+      console.log("Auth result:", result);
 
       if (result.success) {
         toast.success(result.message);
       } else {
-        toast.error(result.message);
+        toast.error(result.message || "Authentication failed");
       }
-    } catch {
+    } catch (error) {
+      console.error("Auth error:", error);
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
