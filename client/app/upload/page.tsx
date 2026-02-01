@@ -198,8 +198,8 @@ export default function UploadPage() {
     return (
       <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400">Loading...</p>
+          <div className="w-10 h-10 border-4 border-[#00d4ff] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[#666666]">Loading...</p>
         </div>
       </div>
     );
@@ -213,25 +213,25 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-gradient-dark">
-      <header className="bg-gray-900/50 border-b border-gray-800 px-4 sm:px-6 py-4">
+      <header className="bg-[#0a0a0a]/80 border-b border-[#222222] px-4 sm:px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/dashboard")}
-              className="text-gray-400 hover:text-gray-200"
+              className="text-[#666666] hover:text-white"
             >
               ← Back
             </button>
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">NC</span>
+            <div className="w-10 h-10 bg-[#00d4ff] rounded-lg flex items-center justify-center">
+              <span className="text-black font-bold text-lg">NC</span>
             </div>
-            <h1 className="text-xl font-semibold text-gray-100">
+            <h1 className="text-xl font-semibold text-white">
               Upload Documents
             </h1>
           </div>
 
           {files.length > 0 && (
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-[#666666]">
               {pendingCount} pending • {successCount} completed
             </div>
           )}
@@ -246,15 +246,15 @@ export default function UploadPage() {
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
             isDragOver
-              ? "border-cyan-500 bg-cyan-500/10"
-              : "border-gray-700 hover:border-gray-600"
+              ? "border-[#00d4ff] bg-[#00d4ff]/10"
+              : "border-[#333333] hover:border-[#444444]"
           }`}
         >
-          <div className="text-5xl mb-4 text-gray-500">📄</div>
-          <h2 className="text-lg font-semibold text-gray-100 mb-2">
+          <div className="text-5xl mb-4 text-[#666666]">📄</div>
+          <h2 className="text-lg font-semibold text-white mb-2">
             Drag & Drop your documents here
           </h2>
-          <p className="text-gray-400 mb-4">
+          <p className="text-[#666666] mb-4">
             Supports PDF, JPG, PNG up to 10MB
           </p>
           <label className="inline-block">
@@ -275,7 +275,7 @@ export default function UploadPage() {
         {files.length > 0 && (
           <div className="mt-8 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-100">
+              <h3 className="text-lg font-semibold text-white">
                 Uploaded Files ({files.length})
               </h3>
               {pendingCount > 0 && (
@@ -295,24 +295,24 @@ export default function UploadPage() {
                   className="card p-4"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
+                    <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                       {fileData.docType ? getDocIcon(fileData.docType) : "📄"}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium text-gray-100 truncate">
+                        <p className="font-medium text-white truncate">
                           {fileData.file.name}
                         </p>
                         <button
                           onClick={() => removeFile(fileData.id)}
-                          className="text-gray-400 hover:text-rose-400 ml-2"
+                          className="text-[#666666] hover:text-[#ff4444] ml-2"
                         >
                           ✕
                         </button>
                       </div>
 
-                      <p className="text-sm text-gray-500 mb-3">
+                      <p className="text-sm text-[#666666] mb-3">
                         {(fileData.file.size / 1024).toFixed(1)} KB
                       </p>
 
@@ -370,16 +370,16 @@ export default function UploadPage() {
                       {fileData.status === "processing" && (
                         <div>
                           <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-cyan-400">
+                            <span className="text-[#00d4ff]">
                               Generating ZK Proof...
                             </span>
-                            <span className="text-gray-400">
+                            <span className="text-[#666666]">
                               {fileData.progress}%
                             </span>
                           </div>
-                          <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                          <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-cyan-500 transition-all duration-200"
+                              className="h-full bg-[#00d4ff] transition-all duration-200"
                               style={{ width: `${fileData.progress}%` }}
                             />
                           </div>
@@ -387,14 +387,14 @@ export default function UploadPage() {
                       )}
 
                       {fileData.status === "success" && (
-                        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
-                          <div className="flex items-center gap-2 text-emerald-400 mb-1">
+                        <div className="bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-lg p-3">
+                          <div className="flex items-center gap-2 text-[#00ff88] mb-1">
                             <span>✓</span>
                             <span className="font-medium">
                               Proof Generated
                             </span>
                           </div>
-                          <p className="text-xs text-emerald-400/80 font-mono break-all">
+                          <p className="text-xs text-[#00ff88]/80 font-mono break-all">
                             Hash: {fileData.zkProofHash}
                           </p>
                         </div>

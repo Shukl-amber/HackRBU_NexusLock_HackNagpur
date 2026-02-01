@@ -106,8 +106,8 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400">Loading...</p>
+          <div className="w-10 h-10 border-4 border-[#00d4ff] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[#666666]">Loading...</p>
         </div>
       </div>
     );
@@ -118,18 +118,18 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-dark">
       {/* Header */}
-      <header className="bg-gray-900/50 border-b border-gray-800 px-4 sm:px-6 py-4">
+      <header className="bg-[#0a0a0a]/80 border-b border-[#222222] px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">NC</span>
+              <div className="w-10 h-10 bg-[#00d4ff] rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-lg">NC</span>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-100">
+                <h1 className="text-xl font-semibold text-white">
                   NexusConnect Dashboard
                 </h1>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[#666666]">
                   Last sync: {formatTime(lastSync.toISOString())}
                 </p>
               </div>
@@ -155,14 +155,14 @@ export default function DashboardPage() {
               >
                 Revoke All
               </button>
-              <div className="h-6 w-px bg-gray-700" />
+              <div className="h-6 w-px bg-[#333333]" />
               <div className="text-right">
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-[#a0a0a0]">
                   {user?.name || user?.email}
                 </p>
                 <button
                   onClick={logout}
-                  className="text-xs text-cyan-400 hover:text-cyan-300"
+                  className="text-xs text-[#00d4ff] hover:text-[#00e5ff]"
                 >
                   Logout
                 </button>
@@ -177,29 +177,29 @@ export default function DashboardPage() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="card p-4">
-            <p className="text-gray-400 text-sm">Active Proofs</p>
-            <p className="text-2xl font-bold text-cyan-400">{activeProofs.length}</p>
+            <p className="text-[#666666] text-sm">Active Proofs</p>
+            <p className="text-2xl font-bold text-[#00d4ff]">{activeProofs.length}</p>
           </div>
           <div className="card p-4">
-            <p className="text-gray-400 text-sm">Total Proofs</p>
-            <p className="text-2xl font-bold text-gray-100">{proofs.length}</p>
+            <p className="text-[#666666] text-sm">Total Proofs</p>
+            <p className="text-2xl font-bold text-white">{proofs.length}</p>
           </div>
           <div className="card p-4">
-            <p className="text-gray-400 text-sm">Access Events</p>
-            <p className="text-2xl font-bold text-emerald-400">{accessLogs.length}</p>
+            <p className="text-[#666666] text-sm">Access Events</p>
+            <p className="text-2xl font-bold text-[#00ff88]">{accessLogs.length}</p>
           </div>
           <div className="card p-4">
-            <p className="text-gray-400 text-sm">Pending Requests</p>
-            <p className="text-2xl font-bold text-amber-400">{pendingRequests.length}</p>
+            <p className="text-[#666666] text-sm">Pending Requests</p>
+            <p className="text-2xl font-bold text-[#ffaa00]">{pendingRequests.length}</p>
           </div>
         </div>
 
         {/* Active Proofs Section */}
         <section className="card">
-          <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-100">
+          <div className="px-6 py-4 border-b border-[#222222] flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white">
               Active Proofs
-              <span className="text-sm font-normal text-gray-500 ml-2">
+              <span className="text-sm font-normal text-[#666666] ml-2">
                 ({activeProofs.length} active)
               </span>
             </h2>
@@ -207,11 +207,11 @@ export default function DashboardPage() {
 
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-8 h-8 border-4 border-[#00d4ff] border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           ) : proofs.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-gray-400">No proofs yet. Upload your first document!</p>
+              <p className="text-[#666666]">No proofs yet. Upload your first document!</p>
               <button
                 onClick={() => router.push("/upload")}
                 className="btn-primary mt-4"
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                     <tr key={proof.id}>
                       <td className="flex items-center gap-2">
                         <span className="text-xl">{getDocIcon(proof.docType)}</span>
-                        <span className="font-medium text-gray-100">{proof.docType}</span>
+                        <span className="font-medium text-white">{proof.docType}</span>
                       </td>
                       <td>{proof.purpose}</td>
                       <td>{proof.requester}</td>
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                         {proof.status === "active" && (
                           <button
                             onClick={() => handleRevoke(proof.id)}
-                            className="text-rose-400 hover:text-rose-300 text-sm font-medium"
+                            className="text-[#ff4444] hover:text-[#ff6666] text-sm font-medium"
                           >
                             Revoke
                           </button>
@@ -265,10 +265,10 @@ export default function DashboardPage() {
 
         {/* Access Logs Section */}
         <section className="card">
-          <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-100">
+          <div className="px-6 py-4 border-b border-[#222222] flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white">
               Access Logs
-              <span className="text-sm font-normal text-gray-500 ml-2">
+              <span className="text-sm font-normal text-[#666666] ml-2">
                 ({accessLogs.length} events)
               </span>
             </h2>
@@ -279,8 +279,8 @@ export default function DashboardPage() {
                   onClick={() => setLogFilter(filter)}
                   className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                     logFilter === filter
-                      ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                      : "text-gray-400 hover:bg-gray-800"
+                      ? "bg-[#00d4ff]/20 text-[#00d4ff] border border-[#00d4ff]/30"
+                      : "text-[#666666] hover:bg-[#1a1a1a]"
                   }`}
                 >
                   {filter === "all" ? "All" : filter === "today" ? "Today" : "This Week"}
@@ -291,35 +291,35 @@ export default function DashboardPage() {
 
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-8 h-8 border-4 border-[#00d4ff] border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           ) : accessLogs.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-[#666666]">
               No access logs for this period
             </div>
           ) : (
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-[#222222]">
               {accessLogs.map((log) => (
                 <div
                   key={log.id}
-                  className="px-6 py-4 flex items-center justify-between hover:bg-gray-800/30"
+                  className="px-6 py-4 flex items-center justify-between hover:bg-[#1a1a1a]/50"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-lg">
+                    <div className="w-10 h-10 bg-[#1a1a1a] rounded-full flex items-center justify-center text-lg">
                       {getActionIcon(log.action)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-100">{log.domain}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm font-medium text-white">{log.domain}</p>
+                      <p className="text-xs text-[#666666]">
                         {log.action} {log.docType}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-500">{formatTime(log.timestamp)}</span>
+                    <span className="text-sm text-[#666666]">{formatTime(log.timestamp)}</span>
                     <button
                       onClick={() => setSelectedLog(log)}
-                      className="text-sm text-cyan-400 hover:text-cyan-300"
+                      className="text-sm text-[#00d4ff] hover:text-[#00e5ff]"
                     >
                       Details
                     </button>
@@ -332,27 +332,27 @@ export default function DashboardPage() {
 
         {/* Pending Requests Section */}
         <section className="card">
-          <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-100">
+          <div className="px-6 py-4 border-b border-[#222222] flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white">
               Pending Requests
-              <span className="text-sm font-normal text-gray-500 ml-2">
+              <span className="text-sm font-normal text-[#666666] ml-2">
                 ({pendingRequests.length})
               </span>
             </h2>
             <button
               onClick={fetchData}
-              className="text-sm text-cyan-400 hover:text-cyan-300"
+              className="text-sm text-[#00d4ff] hover:text-[#00e5ff]"
             >
               Refresh
             </button>
           </div>
 
           {pendingRequests.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-[#666666]">
               No pending consent requests
             </div>
           ) : (
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-[#222222]">
               {pendingRequests.map((req) => (
                 <div
                   key={req.id}
@@ -361,15 +361,15 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-4">
                     <span className="text-xl">{getDocIcon(req.docType)}</span>
                     <div>
-                      <p className="text-sm font-medium text-gray-100">{req.requester}</p>
-                      <p className="text-xs text-gray-500">{req.purpose}</p>
+                      <p className="text-sm font-medium text-white">{req.requester}</p>
+                      <p className="text-xs text-[#666666]">{req.purpose}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-500">
+                    <button className="px-3 py-1.5 text-sm font-medium text-black bg-[#00ff88] rounded-lg hover:bg-[#00ff99]">
                       Approve
                     </button>
-                    <button className="px-3 py-1.5 text-sm font-medium text-rose-400 border border-rose-500/30 rounded-lg hover:bg-rose-500/10">
+                    <button className="px-3 py-1.5 text-sm font-medium text-[#ff4444] border border-[#ff4444]/30 rounded-lg hover:bg-[#ff4444]/10">
                       Deny
                     </button>
                   </div>
@@ -383,7 +383,7 @@ export default function DashboardPage() {
       {/* Details Modal */}
       {selectedLog && (
         <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedLog(null)}
         >
           <div
@@ -391,36 +391,36 @@ export default function DashboardPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-100">Access Log Details</h3>
+              <h3 className="text-lg font-semibold text-white">Access Log Details</h3>
               <button
                 onClick={() => setSelectedLog(null)}
-                className="text-gray-400 hover:text-gray-200"
+                className="text-[#666666] hover:text-white"
               >
                 ✕
               </button>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-400">Domain</span>
-                <span className="text-sm font-medium text-gray-100">{selectedLog.domain}</span>
+                <span className="text-sm text-[#666666]">Domain</span>
+                <span className="text-sm font-medium text-white">{selectedLog.domain}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-400">Action</span>
-                <span className="text-sm font-medium text-gray-100">{selectedLog.action}</span>
+                <span className="text-sm text-[#666666]">Action</span>
+                <span className="text-sm font-medium text-white">{selectedLog.action}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-400">Document</span>
-                <span className="text-sm font-medium text-gray-100">{selectedLog.docType}</span>
+                <span className="text-sm text-[#666666]">Document</span>
+                <span className="text-sm font-medium text-white">{selectedLog.docType}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-400">Time</span>
-                <span className="text-sm font-medium text-gray-100">
+                <span className="text-sm text-[#666666]">Time</span>
+                <span className="text-sm font-medium text-white">
                   {formatDateTime(selectedLog.timestamp)}
                 </span>
               </div>
-              <div className="pt-3 border-t border-gray-800">
-                <p className="text-sm text-gray-400 mb-2">Full Details</p>
-                <pre className="bg-gray-900 p-3 rounded-lg text-xs overflow-auto max-h-40 text-gray-300">
+              <div className="pt-3 border-t border-[#222222]">
+                <p className="text-sm text-[#666666] mb-2">Full Details</p>
+                <pre className="bg-[#0a0a0a] p-3 rounded-lg text-xs overflow-auto max-h-40 text-[#a0a0a0]">
                   {JSON.stringify(selectedLog.details, null, 2)}
                 </pre>
               </div>
