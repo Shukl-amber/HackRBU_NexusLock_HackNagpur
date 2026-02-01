@@ -5,9 +5,6 @@ const nextConfig: NextConfig = {
   typescript: {
     tsconfigPath: "./tsconfig.json",
   },
-  eslint: {
-    dirs: ["app", "components", "lib", "types"],
-  },
   images: {
     remotePatterns: [
       {
@@ -15,11 +12,6 @@ const nextConfig: NextConfig = {
         hostname: "**.supabase.co",
       },
     ],
-  },
-  experimental: {
-    turbopack: {
-      resolveAlias: {},
-    },
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
