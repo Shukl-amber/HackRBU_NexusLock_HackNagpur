@@ -1,4 +1,4 @@
-"""FastAPI application - main entry point for ConsentVault DPI API."""
+"""FastAPI application - main entry point for Nexus Connect API."""
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,10 +41,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="ConsentVault DPI API",
+    title="Nexus Connect API",
     description="DPDP-compliant consent management with ZKP verification",
     version="1.0.0",
-    contact={"name": "ConsentVault Team", "email": "support@consentvault.gov.in"},
+    contact={"name": "Nexus Connect Team", "email": "support@nexusconnect.gov.in"},
     lifespan=lifespan,
 )
 

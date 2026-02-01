@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ConsentVault DPI - QA Test Suite
+# Nexus Connect - QA Test Suite
 # Tests all API endpoints with colored output
 
 set -e
@@ -66,7 +66,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 # Main test execution
-print_header "ConsentVault DPI - QA Test Suite"
+print_header "Nexus Connect - QA Test Suite"
 
 echo "Testing API at: $BASE_URL"
 echo "Admin username: $ADMIN_USERNAME"

@@ -11,7 +11,7 @@ async def create_api_key(
     db: AsyncSession, name: str, domain: str, key_hash: str
 ) -> tuple[APIKey, str]:
     """Create new API key. Returns (APIKey object, plain key)."""
-    key_id = f"cvk_{secrets.token_urlsafe(16)}"
+    key_id = f"nck_{secrets.token_urlsafe(16)}"
     plain_key = f"{key_id}.{secrets.token_urlsafe(32)}"
     key_prefix = plain_key[:10]
 

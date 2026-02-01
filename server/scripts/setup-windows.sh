@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ConsentVault DPI - Automated Setup Script
+# Nexus Connect - Automated Setup Script
 # This script sets up the project entirely within Docker
 
 set -e
@@ -13,7 +13,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}ConsentVault DPI - Automated Setup${NC}"
+echo -e "${BLUE}Nexus Connect - Automated Setup${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 # Check if we're in WSL
@@ -208,11 +208,11 @@ echo -e "${YELLOW}[6/7] Running database migrations...${NC}"
 
 # Databases are already created by server health checks or env config usually, 
 # but let's ensure they exist as the server expects them.
-$DOCKER_COMPOSE exec -T timescaledb psql -U postgres -c "CREATE DATABASE consentvault;" || true
-$DOCKER_COMPOSE exec -T postgres-private psql -U postgres -c "CREATE DATABASE consentvault_private;" || true
+$DOCKER_COMPOSE exec -T timescaledb psql -U postgres -c "CREATE DATABASE nexus_connect;" || true
+$DOCKER_COMPOSE exec -T postgres-private psql -U postgres -c "CREATE DATABASE nexus_connect_private;" || true
 
 # Enable TimescaleDB extension
-$DOCKER_COMPOSE exec -T timescaledb psql -U postgres -d consentvault -c "CREATE EXTENSION IF NOT EXISTS timescaledb;" || true
+$DOCKER_COMPOSE exec -T timescaledb psql -U postgres -d nexus_connect -c "CREATE EXTENSION IF NOT EXISTS timescaledb;" || true
 
 # Run migrations via Docker
 $DOCKER_COMPOSE exec -T server alembic upgrade head

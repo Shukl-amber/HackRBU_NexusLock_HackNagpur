@@ -36,12 +36,12 @@ def get_url(db_type: str) -> str:
     if db_type == "public":
         url = os.getenv(
             "PUBLIC_DATABASE_URL",
-            "postgresql+asyncpg://postgres:postgres@localhost:5432/consentvault",
+            "postgresql+asyncpg://postgres:postgres@localhost:5432/nexus_connect",
         )
     else:  # private
         url = os.getenv(
             "PRIVATE_DATABASE_URL",
-            "postgresql+asyncpg://postgres:postgres@localhost:5433/consentvault_private",
+            "postgresql+asyncpg://postgres:postgres@localhost:5433/nexus_connect_private",
         )
     return url
 

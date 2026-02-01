@@ -1,8 +1,8 @@
-# ConsentVault DPI - Backend
+# Nexus Connect - Backend
 
 **DPDP-Compliant Consent Management System with Zero-Knowledge Proofs**
 
-ConsentVault DPI is a production-ready FastAPI backend implementing India's Digital Personal Data Protection (DPDP) Act 2023 requirements. It provides verifiable consent management using Zero-Knowledge Proofs (ZKPs), dual-database architecture for separation of proof and document storage, and comprehensive audit logging.
+Nexus Connect is a production-ready FastAPI backend implementing India's Digital Personal Data Protection (DPDP) Act 2023 requirements. It provides verifiable consent management using Zero-Knowledge Proofs (ZKPs), dual-database architecture for separation of proof and document storage, and comprehensive audit logging.
 
 ---
 
@@ -138,8 +138,8 @@ All configuration is managed via `.env` file. Copy `.env.example` and customize:
 
 | Variable | Description | Default | Production Notes |
 |----------|-------------|---------|------------------|
-| `PUBLIC_DATABASE_URL` | TimescaleDB connection URL | `postgresql+asyncpg://postgres:postgres@timescaledb:5432/consentvault` | Use strong passwords |
-| `PRIVATE_DATABASE_URL` | Private PostgreSQL URL | `postgresql+asyncpg://postgres:postgres@postgres-private:5433/consentvault_private` | Use strong passwords |
+| `PUBLIC_DATABASE_URL` | TimescaleDB connection URL | `postgresql+asyncpg://postgres:postgres@timescaledb:5432/nexus_connect` | Use strong passwords |
+| `PRIVATE_DATABASE_URL` | Private PostgreSQL URL | `postgresql+asyncpg://postgres:postgres@postgres-private:5433/nexus_connect_private` | Use strong passwords |
 | `REDIS_URL` | Redis connection URL | `redis://redis:6379` | Add password in production |
 | `SECRET_KEY` | JWT signing key | ⚠️ **MUST CHANGE** | Min 32 chars, cryptographically random |
 | `MASTER_ENCRYPTION_KEY` | AES-256 encryption key | ⚠️ **MUST CHANGE** | Min 32 chars, cryptographically random |
@@ -374,13 +374,13 @@ Content-Type: application/json
 
 # Response (201 Created):
 {
-  "key_id": "cvk_abc123def456",
+  "key_id": "nck_abc123def456",
   "name": "Production Healthcare API",
-  "key_prefix": "cvk_abc123",
+  "key_prefix": "nck_abc123",
   "domain": "healthcare.gov.in",
   "created_at": "2025-01-30T10:30:00Z",
   "revoked": false,
-  "full_key": "cvk_abc123def456ghi789jkl012mno345pqr678"  // ⚠️ ONLY SHOWN ONCE
+  "full_key": "nck_abc123def456ghi789jkl012mno345pqr678"  // ⚠️ ONLY SHOWN ONCE
 }
 ```
 
@@ -395,9 +395,9 @@ Authorization: Bearer <admin_jwt_token>
 {
   "api_keys": [
     {
-      "key_id": "cvk_abc123def456",
+      "key_id": "nck_abc123def456",
       "name": "Production Healthcare API",
-      "key_prefix": "cvk_abc123",  // Full key NOT exposed
+      "key_prefix": "nck_abc123",  // Full key NOT exposed
       "domain": "healthcare.gov.in",
       "created_at": "2025-01-30T10:30:00Z",
       "revoked": false
@@ -408,13 +408,13 @@ Authorization: Bearer <admin_jwt_token>
 
 #### 10. Revoke API Key (Admin Only)
 ```bash
-DELETE /api/v1/admin/api-keys/cvk_abc123def456
+DELETE /api/v1/admin/api-keys/nck_abc123def456
 Authorization: Bearer <admin_jwt_token>
 
 # Response (200 OK):
 {
   "revoked": true,
-  "key_id": "cvk_abc123def456"
+  "key_id": "nck_abc123def456"
 }
 ```
 
@@ -450,7 +450,7 @@ bash scripts/qa-tests.sh
 **Via SQL:**
 ```sql
 -- Connect to public database
-psql -U postgres -d consentvault
+psql -U postgres -d nexus_connect
 
 -- Add domain
 INSERT INTO trusted_domains (domain) VALUES ('healthcare.gov.in');
@@ -465,7 +465,7 @@ bash scripts/seed-data.sh
 
 ```bash
 # TimescaleDB logs (last 100 entries)
-docker-compose exec timescaledb psql -U postgres -d consentvault -c "SELECT * FROM logs ORDER BY timestamp DESC LIMIT 100;"
+docker-compose exec timescaledb psql -U postgres -d nexus_connect -c "SELECT * FROM logs ORDER BY timestamp DESC LIMIT 100;"
 
 # Application logs
 docker-compose logs -f app  # If running via docker-compose
@@ -489,7 +489,7 @@ docker-compose logs -f app  # If running via docker-compose
 
 ### API Keys
 
-- Format: `cvk_<random_40_chars>`
+- Format: `nck_<random_40_chars>`
 - Stored: SHA-256 hash in `api_keys` table
 - Usage: Future integration with external systems (not currently implemented in endpoints)
 
@@ -529,11 +529,11 @@ docker-compose logs -f app  # If running via docker-compose
 **Solution:**
 ```bash
 # Create databases manually
-docker compose exec timescaledb psql -U postgres -c "CREATE DATABASE consentvault;"
-docker compose exec postgres-private psql -U postgres -c "CREATE DATABASE consentvault_private;"
+docker compose exec timescaledb psql -U postgres -c "CREATE DATABASE nexus_connect;"
+docker compose exec postgres-private psql -U postgres -c "CREATE DATABASE nexus_connect_private;"
 
 # Enable TimescaleDB extension
-docker compose exec timescaledb psql -U postgres -d consentvault -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
+docker compose exec timescaledb psql -U postgres -d nexus_connect -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
 
 # Run migration via server container
 docker compose exec server alembic upgrade head
@@ -562,7 +562,7 @@ docker compose exec redis redis-cli ping  # Should return PONG
 **Solution:**
 ```bash
 # Check if admin exists
-docker-compose exec timescaledb psql -U postgres -d consentvault -c "SELECT * FROM admin_users;"
+docker-compose exec timescaledb psql -U postgres -d nexus_connect -c "SELECT * FROM admin_users;"
 
 # If empty, re-run migration
 alembic downgrade base
@@ -585,7 +585,7 @@ curl http://localhost:8000/health
 redis-cli -h localhost -p 6379 GET "blacklist:<proof_id>"
 
 # 4. Query database
-docker-compose exec timescaledb psql -U postgres -d consentvault -c "SELECT * FROM proofs WHERE id = '<proof_id>';"
+docker-compose exec timescaledb psql -U postgres -d nexus_connect -c "SELECT * FROM proofs WHERE id = '<proof_id>';"
 ```
 
 ### Issue: `pg_cron` extension errors
@@ -599,7 +599,7 @@ docker-compose exec timescaledb apt-get update && apt-get install -y postgresql-
 
 # 2. Add to postgresql.conf
 shared_preload_libraries = 'timescaledb,pg_cron'
-cron.database_name = 'consentvault'
+cron.database_name = 'nexus_connect'
 
 # 3. Restart container
 docker-compose restart timescaledb

@@ -1,17 +1,17 @@
 services:
   timescaledb:
     image: timescale/timescaledb:2.13.0-pg15
-    container_name: consentvault-timescaledb
+    container_name: nexus-connect-timescaledb
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: consentvault
+      POSTGRES_DB: nexus_connect
     volumes:
       - ./docker_data/timescaledb:/var/lib/postgresql/data
     networks:
-      - consentvault-network
+      - nexus-connect-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -21,17 +21,17 @@ services:
 
   postgres-private:
     image: postgres:15
-    container_name: consentvault-postgres-private
+    container_name: nexus-connect-postgres-private
     ports:
       - "5433:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: consentvault_private
+      POSTGRES_DB: nexus_connect_private
     volumes:
       - ./docker_data/postgres_private:/var/lib/postgresql/data
     networks:
-      - consentvault-network
+      - nexus-connect-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -41,13 +41,13 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: consentvault-redis
+    container_name: nexus-connect-redis
     ports:
       - "6379:6379"
     volumes:
       - ./docker_data/redis:/data
     networks:
-      - consentvault-network
+      - nexus-connect-network
     healthcheck:
       test: ["CMD", "redis-cli", "PING"]
       interval: 10s
@@ -57,12 +57,12 @@ services:
 
   server:
     build: .
-    container_name: consentvault-server
+    container_name: nexus-connect-server
     ports:
       - "8000:8000"
     environment:
-      - PUBLIC_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@timescaledb:5432/consentvault
-      - PRIVATE_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-private:5432/consentvault_private
+      - PUBLIC_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@timescaledb:5432/nexus_connect
+      - PRIVATE_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-private:5432/nexus_connect_private
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-min-32-characters-long-here}
       - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY:-your-master-key-min-32-characters-long-here}
@@ -76,9 +76,9 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - consentvault-network
+      - nexus-connect-network
     restart: unless-stopped
 
 networks:
-  consentvault-network:
+  nexus-connect-network:
     driver: bridge

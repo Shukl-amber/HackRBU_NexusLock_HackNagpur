@@ -1,1 +1,1 @@
-"""API package - RESTful endpoints for ConsentVault."""
+"""API package - RESTful endpoints for Nexus Connect."""

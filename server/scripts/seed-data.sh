@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ConsentVault DPI - Seed Data Script
+# Nexus Connect - Seed Data Script
 # Seeds trusted domains and creates sample API keys
 
 set -e
@@ -16,13 +16,13 @@ NC='\033[0m' # No Color
 PUBLIC_DB_HOST="${PUBLIC_DB_HOST:-localhost}"
 PUBLIC_DB_PORT="${PUBLIC_DB_PORT:-5432}"
 PUBLIC_DB_USER="${PUBLIC_DB_USER:-postgres}"
-PUBLIC_DB_NAME="${PUBLIC_DB_NAME:-consentvault}"
+PUBLIC_DB_NAME="${PUBLIC_DB_NAME:-nexus_connect}"
 BASE_URL="${BASE_URL:-http://localhost:8000}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-change-this-password}"
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}ConsentVault DPI - Seed Data Script${NC}"
+echo -e "${BLUE}Nexus Connect - Seed Data Script${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 # Only use Docker Compose
@@ -52,7 +52,7 @@ fi
 # Function to execute SQL via Docker
 exec_sql() {
     local sql="$1"
-    $DOCKER_COMPOSE_CMD exec -T timescaledb psql -U postgres -d consentvault -c "$sql" 2>&1
+    $DOCKER_COMPOSE_CMD exec -T timescaledb psql -U postgres -d nexus_connect -c "$sql" 2>&1
 }
 
 # Seed Trusted Domains
@@ -150,7 +150,7 @@ echo -e "${BLUE}========================================${NC}\n"
 echo -e "Next steps:"
 echo -e "1. ${YELLOW}Test the API:${NC} bash scripts/qa-tests.sh"
 echo -e "2. ${YELLOW}View trusted domains:${NC}"
-echo -e "   $DOCKER_COMPOSE_CMD exec timescaledb psql -U postgres -d consentvault -c 'SELECT * FROM trusted_domains;'"
+echo -e "   $DOCKER_COMPOSE_CMD exec timescaledb psql -U postgres -d nexus_connect -c 'SELECT * FROM trusted_domains;'"
 echo -e "3. ${YELLOW}View API keys:${NC} curl -H \"Authorization: Bearer <admin_token>\" $BASE_URL/api/v1/admin/api-keys\n"
 
 exit 0
