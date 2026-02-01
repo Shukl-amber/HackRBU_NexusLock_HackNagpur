@@ -32,14 +32,12 @@ export default function UploadPage() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Protect route
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push("/auth");
     }
   }, [isAuthenticated, authLoading, router]);
 
-  // Handle file selection
   const handleFiles = useCallback((fileList: FileList) => {
     const newFiles: UploadedFile[] = Array.from(fileList).map((file) => ({
       id: `file_${Date.now()}_${Math.random().toString(36).slice(2)}`,
@@ -54,7 +52,6 @@ export default function UploadPage() {
     setFiles((prev) => [...prev, ...newFiles]);
   }, []);
 
-  // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -76,19 +73,16 @@ export default function UploadPage() {
     [handleFiles]
   );
 
-  // Update file metadata
   const updateFile = (id: string, updates: Partial<UploadedFile>) => {
     setFiles((prev) =>
       prev.map((f) => (f.id === id ? { ...f, ...updates } : f))
     );
   };
 
-  // Remove file
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  // Generate mock ZKP proof
   const generateMockProof = () => {
     return {
       pi_a: [
@@ -113,35 +107,28 @@ export default function UploadPage() {
     };
   };
 
-  // Process file: call backend onboard API
   const processFile = async (fileData: UploadedFile) => {
     if (!fileData.docType || !fileData.purpose || !fileData.requester || !fileData.docData) {
-      toast.error("Please fill all fields: document type, purpose, requester, and document data");
+      toast.error("Please fill all fields");
       return;
     }
 
     updateFile(fileData.id, { status: "processing", progress: 0 });
 
     try {
-      // Get auth token
       const token = getToken();
       if (!token) {
-        throw new Error("Not authenticated. Please login again.");
+        throw new Error("Not authenticated");
       }
 
-      // Generate mock ZKP proof
       const mockProof = generateMockProof();
-      
-      // Mock public signals
       const pubSignals = [
         `signal_${Math.random().toString(36).slice(2)}`,
         `signal_${Math.random().toString(36).slice(2)}`,
       ];
 
-      // Simulate progress
       updateFile(fileData.id, { progress: 20 });
 
-      // Call backend onboard API
       await axios.post(
         `${API_URL}/api/v1/onboard`,
         {
@@ -160,11 +147,9 @@ export default function UploadPage() {
         }
       );
 
-      // Simulate final progress
       updateFile(fileData.id, { progress: 90 });
       await new Promise((r) => setTimeout(r, 300));
 
-      // Extract proof hash from response token (for display)
       const zkHash = `0x${Array.from({ length: 40 }, () =>
         Math.floor(Math.random() * 16).toString(16)
       ).join("")}`;
@@ -175,11 +160,9 @@ export default function UploadPage() {
         zkProofHash: zkHash,
       });
 
-      toast.success(`${fileData.docType} proof generated successfully!`);
+      toast.success(`${fileData.docType} proof generated!`);
     } catch (error) {
-      console.error("Onboard error:", error);
-      
-      let errorMessage = "Failed to generate proof. Please try again.";
+      let errorMessage = "Failed to generate proof";
       if (axios.isAxiosError(error) && error.response) {
         errorMessage = error.response.data.detail || errorMessage;
       } else if (error instanceof Error) {
@@ -196,14 +179,13 @@ export default function UploadPage() {
     }
   };
 
-  // Process all pending files
   const processAllFiles = async () => {
     const pendingFiles = files.filter(
       (f) => f.status === "pending" && f.docType && f.purpose && f.requester && f.docData
     );
 
     if (pendingFiles.length === 0) {
-      toast.warning("No files ready to process. Please complete all required fields.");
+      toast.warning("No files ready");
       return;
     }
 
@@ -212,13 +194,12 @@ export default function UploadPage() {
     }
   };
 
-  // Loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500">Loading...</p>
+          <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -231,34 +212,32 @@ export default function UploadPage() {
   const successCount = files.filter((f) => f.status === "success").length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+    <div className="min-h-screen bg-gradient-dark">
+      <header className="bg-gray-900/50 border-b border-gray-800 px-4 sm:px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/dashboard")}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-200"
             >
               ← Back
             </button>
-             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-               <span className="text-white font-bold text-lg">NC</span>
-             </div>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">NC</span>
+            </div>
+            <h1 className="text-xl font-semibold text-gray-100">
               Upload Documents
             </h1>
           </div>
 
           {files.length > 0 && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-400">
               {pendingCount} pending • {successCount} completed
             </div>
           )}
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Drop Zone */}
         <div
@@ -267,15 +246,15 @@ export default function UploadPage() {
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
             isDragOver
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
+              ? "border-cyan-500 bg-cyan-500/10"
+              : "border-gray-700 hover:border-gray-600"
           }`}
         >
-          <div className="text-5xl mb-4">📄</div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="text-5xl mb-4 text-gray-500">📄</div>
+          <h2 className="text-lg font-semibold text-gray-100 mb-2">
             Drag & Drop your documents here
           </h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-gray-400 mb-4">
             Supports PDF, JPG, PNG up to 10MB
           </p>
           <label className="inline-block">
@@ -286,7 +265,7 @@ export default function UploadPage() {
               onChange={(e) => e.target.files && handleFiles(e.target.files)}
               className="hidden"
             />
-            <span className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium cursor-pointer hover:bg-blue-700 transition-colors">
+            <span className="btn-primary cursor-pointer">
               Browse Files
             </span>
           </label>
@@ -296,13 +275,13 @@ export default function UploadPage() {
         {files.length > 0 && (
           <div className="mt-8 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-100">
                 Uploaded Files ({files.length})
               </h3>
               {pendingCount > 0 && (
                 <button
                   onClick={processAllFiles}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  className="btn-primary"
                 >
                   Generate All Proofs
                 </button>
@@ -313,23 +292,21 @@ export default function UploadPage() {
               {files.map((fileData) => (
                 <div
                   key={fileData.id}
-                  className="bg-white rounded-xl border border-gray-200 p-4"
+                  className="card p-4"
                 >
                   <div className="flex items-start gap-4">
-                    {/* File Icon */}
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
+                    <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                       {fileData.docType ? getDocIcon(fileData.docType) : "📄"}
                     </div>
 
-                    {/* File Details */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="font-medium text-gray-100 truncate">
                           {fileData.file.name}
                         </p>
                         <button
                           onClick={() => removeFile(fileData.id)}
-                          className="text-gray-400 hover:text-red-500 ml-2"
+                          className="text-gray-400 hover:text-rose-400 ml-2"
                         >
                           ✕
                         </button>
@@ -341,7 +318,6 @@ export default function UploadPage() {
 
                       {fileData.status === "pending" && (
                         <div className="space-y-3">
-                          {/* Doc Type Selector */}
                           <select
                             value={fileData.docType || ""}
                             onChange={(e) =>
@@ -349,7 +325,7 @@ export default function UploadPage() {
                                 docType: e.target.value as DocType,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            className="input-dark"
                           >
                             <option value="">Select Document Type</option>
                             {docTypes.map((type) => (
@@ -359,7 +335,6 @@ export default function UploadPage() {
                             ))}
                           </select>
 
-                          {/* Purpose Input */}
                           <input
                             type="text"
                             value={fileData.purpose}
@@ -367,10 +342,9 @@ export default function UploadPage() {
                               updateFile(fileData.id, { purpose: e.target.value })
                             }
                             placeholder="Purpose (e.g., Tax filing)"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
+                            className="input-dark"
                           />
 
-                          {/* Requester Input */}
                           <input
                             type="text"
                             value={fileData.requester}
@@ -378,18 +352,17 @@ export default function UploadPage() {
                               updateFile(fileData.id, { requester: e.target.value })
                             }
                             placeholder="Requester (e.g., tax.gov.in)"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
+                            className="input-dark"
                           />
 
-                          {/* Document Data Text Area */}
                           <textarea
                             value={fileData.docData}
                             onChange={(e) =>
                               updateFile(fileData.id, { docData: e.target.value })
                             }
-                            placeholder="Document data (e.g., PAN number, Aadhaar details, or base64 encoded content)"
+                            placeholder="Document data"
                             rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder:text-gray-400"
+                            className="input-dark resize-none"
                           />
                         </div>
                       )}
@@ -397,16 +370,16 @@ export default function UploadPage() {
                       {fileData.status === "processing" && (
                         <div>
                           <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-blue-600">
+                            <span className="text-cyan-400">
                               Generating ZK Proof...
                             </span>
-                            <span className="text-gray-500">
+                            <span className="text-gray-400">
                               {fileData.progress}%
                             </span>
                           </div>
-                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-blue-600 transition-all duration-200"
+                              className="h-full bg-cyan-500 transition-all duration-200"
                               style={{ width: `${fileData.progress}%` }}
                             />
                           </div>
@@ -414,29 +387,29 @@ export default function UploadPage() {
                       )}
 
                       {fileData.status === "success" && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <div className="flex items-center gap-2 text-green-700 mb-1">
+                        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
+                          <div className="flex items-center gap-2 text-emerald-400 mb-1">
                             <span>✓</span>
                             <span className="font-medium">
-                              Proof Generated Successfully
+                              Proof Generated
                             </span>
                           </div>
-                          <p className="text-xs text-green-600 font-mono break-all">
+                          <p className="text-xs text-emerald-400/80 font-mono break-all">
                             Hash: {fileData.zkProofHash}
                           </p>
                         </div>
                       )}
 
                       {fileData.status === "error" && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                          <div className="flex items-center gap-2 text-red-700 mb-1">
+                        <div className="bg-rose-500/10 border border-rose-500/30 rounded-lg p-3">
+                          <div className="flex items-center gap-2 text-rose-400 mb-1">
                             <span>✕</span>
                             <span className="font-medium">
-                              Failed to generate proof
+                              Failed
                             </span>
                           </div>
                           {fileData.errorMessage && (
-                            <p className="text-xs text-red-600 mt-1">
+                            <p className="text-xs text-rose-400/80 mt-1">
                               {fileData.errorMessage}
                             </p>
                           )}
@@ -444,7 +417,6 @@ export default function UploadPage() {
                       )}
                     </div>
 
-                    {/* Action Button */}
                     {fileData.status === "pending" &&
                       fileData.docType &&
                       fileData.purpose &&
@@ -452,9 +424,9 @@ export default function UploadPage() {
                       fileData.docData && (
                         <button
                           onClick={() => processFile(fileData)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex-shrink-0"
+                          className="btn-primary text-sm flex-shrink-0"
                         >
-                          Generate Proof
+                          Generate
                         </button>
                       )}
                   </div>
@@ -465,20 +437,14 @@ export default function UploadPage() {
         )}
 
         {/* Info Card */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="font-semibold text-blue-900 mb-2">
-            🔐 How Zero-Knowledge Proofs Work
+        <div className="mt-8 card p-6">
+          <h3 className="font-semibold text-cyan-400 mb-2">
+            How Zero-Knowledge Proofs Work
           </h3>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>
-              • Your document is processed locally - never sent to our servers
-            </li>
-            <li>
-              • A cryptographic proof is generated that verifies your document
-            </li>
-            <li>
-              • Third parties can verify the proof without seeing your data
-            </li>
+          <ul className="text-sm text-gray-400 space-y-1">
+            <li>• Your document is processed locally</li>
+            <li>• A cryptographic proof verifies your document</li>
+            <li>• Third parties verify without seeing your data</li>
             <li>• You control who can verify and for how long</li>
           </ul>
         </div>
