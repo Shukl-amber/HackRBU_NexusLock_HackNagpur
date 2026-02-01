@@ -53,7 +53,12 @@ export const clearAuth = (): void => {
 
 export const loginUser = async (data: LoginRequest): Promise<AuthResponse> => {
   try {
+    console.log("Login attempt:", data);
+    console.log("API_URL:", API_URL);
+    
     const response = await axios.post(`${API_URL}/api/v1/auth/login`, data);
+    
+    console.log("Login response:", response.data);
     
     const { access_token, user } = response.data;
     
@@ -67,7 +72,10 @@ export const loginUser = async (data: LoginRequest): Promise<AuthResponse> => {
       token: access_token,
     };
   } catch (error) {
+    console.error("Login error:", error);
+    
     if (axios.isAxiosError(error) && error.response) {
+      console.error("Error response:", error.response.data);
       return {
         success: false,
         message: error.response.data.detail || "Invalid credentials. Please try again.",
