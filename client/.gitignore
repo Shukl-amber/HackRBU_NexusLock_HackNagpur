@@ -1,15 +1,17 @@
+# Client .gitignore for Next.js frontend
+
 # Dependencies
-node_modules
+node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 bun.lockb
 
 # Next.js
-.next
-out
-build
-dist
+.next/
+out/
+build/
+dist/
 
 # Environment variables
 .env
@@ -18,16 +20,15 @@ dist
 .env.production.local
 
 # IDE
-.vscode
-.idea
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
-.DS_Store
 
 # OS
-Thumbs.db
 .DS_Store
+Thumbs.db
 
 # Logs
 npm-debug.log*
@@ -36,10 +37,21 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # Testing
-coverage
-.nyc_output
+coverage/
+.nyc_output/
 
 # Misc
 *.pem
-.turbo
+.turbo/
 prompt.md
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel/
+
+# PWA
+public/sw.js
+public/workbox-*.js

@@ -122,9 +122,6 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#00d4ff] rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-lg">NC</span>
-              </div>
               <div>
                 <h1 className="text-xl font-semibold text-white">
                   NexusConnect Dashboard

@@ -56,7 +56,7 @@ export default function DemoPage() {
         id: user.id,
         email: user.email,
         name: user.name,
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       });
 
       toast.success(`Logged in as ${user.name}`);
@@ -79,14 +79,11 @@ export default function DemoPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12 pt-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-6 glow-cyan">
-            <span className="text-white font-bold text-3xl">NC</span>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-100 mb-4">
+          <h1 className="text-4xl font-bold text-white mb-4">
             NexusConnect Demo Mode
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Experience the full DPDP-compliant consent management platform. 
+          <p className="text-[#666666] text-lg max-w-2xl mx-auto">
+            Experience the full DPDP-compliant consent management platform.
             Select a user persona below to explore different features.
           </p>
         </div>
@@ -99,7 +96,7 @@ export default function DemoPage() {
               onClick={() => setSelectedUser(user)}
               className={`card-hover p-6 cursor-pointer transition-all duration-200 ${
                 selectedUser?.id === user.id
-                  ? "border-cyan-500 bg-cyan-500/10"
+                  ? "border-[#00d4ff] bg-[#00d4ff]/10"
                   : ""
               }`}
             >
@@ -107,8 +104,8 @@ export default function DemoPage() {
                 <div
                   className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                     user.role === "Admin"
-                      ? "bg-rose-500/20 text-rose-400"
-                      : "bg-cyan-500/20 text-cyan-400"
+                      ? "bg-[#ff4444]/20 text-[#ff4444]"
+                      : "bg-[#00d4ff]/20 text-[#00d4ff]"
                   }`}
                 >
                   <span className="font-bold text-lg">
@@ -116,22 +113,22 @@ export default function DemoPage() {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-100">
+                  <h3 className="text-lg font-semibold text-white">
                     {user.name}
                   </h3>
                   <span
                     className={`text-xs font-medium px-2 py-1 rounded-full ${
                       user.role === "Admin"
-                        ? "bg-rose-500/10 text-rose-400 border border-rose-500/30"
-                        : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30"
+                        ? "bg-[#ff4444]/10 text-[#ff4444] border border-[#ff4444]/30"
+                        : "bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/30"
                     }`}
                   >
                     {user.role}
                   </span>
                 </div>
               </div>
-              <p className="text-gray-400 text-sm mb-4">{user.description}</p>
-              <div className="text-xs text-gray-500">{user.email}</div>
+              <p className="text-[#666666] text-sm mb-4">{user.description}</p>
+              <div className="text-xs text-[#444444]">{user.email}</div>
             </div>
           ))}
         </div>
@@ -141,11 +138,11 @@ export default function DemoPage() {
           <div className="card p-8 mb-12 animate-slideUp">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-100 mb-2">
+                <h2 className="text-2xl font-bold text-white mb-2">
                   Login as {selectedUser.name}
                 </h2>
-                <p className="text-gray-400">
-                  You will be logged in as a {selectedUser.role.toLowerCase()} user. 
+                <p className="text-[#666666]">
+                  You will be logged in as a {selectedUser.role.toLowerCase()} user.
                   {selectedUser.role === "Admin"
                     ? " Access the admin panel to manage API keys and view system health."
                     : " Access the dashboard to manage proofs and view consent history."}
@@ -195,20 +192,20 @@ export default function DemoPage() {
           ].map((feature, idx) => (
             <div key={idx} className="card p-6">
               <div className="text-2xl mb-3">{feature.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-100 mb-2">
+              <h3 className="text-lg font-semibold text-white mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-400 text-sm">{feature.description}</p>
+              <p className="text-[#666666] text-sm">{feature.description}</p>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-gray-800">
-          <p className="text-gray-500 text-sm">
+        <div className="text-center mt-12 pt-8 border-t border-[#222222]">
+          <p className="text-[#444444] text-sm">
             NexusConnect - DPDP-Compliant Consent Management Platform
           </p>
-          <p className="text-gray-600 text-xs mt-2">
+          <p className="text-[#333333] text-xs mt-2">
             Built for Hackathon 2025
           </p>
         </div>

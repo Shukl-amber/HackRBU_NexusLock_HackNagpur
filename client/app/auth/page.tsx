@@ -64,16 +64,13 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4 glow-cyan">
-            <span className="text-white font-bold text-2xl">NC</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-100">NexusConnect</h1>
-          <p className="text-gray-400 mt-1">DPDP-Compliant Consent Management</p>
+          <h1 className="text-2xl font-bold text-white">NexusConnect</h1>
+          <p className="text-[#666666] mt-1">DPDP-Compliant Consent Management</p>
         </div>
 
         {/* Auth Card */}
         <div className="card-hover p-8">
-          <h2 className="text-xl font-semibold text-gray-100 text-center mb-6">
+          <h2 className="text-xl font-semibold text-white text-center mb-6">
             {mode === "login" ? "Welcome back" : "Create your account"}
           </h2>
 
@@ -83,7 +80,7 @@ export default function AuthPage() {
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-300 mb-1"
+                  className="block text-sm font-medium text-[#a0a0a0] mb-1"
                 >
                   Full Name
                 </label>
@@ -103,7 +100,7 @@ export default function AuthPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-300 mb-1"
+                className="block text-sm font-medium text-[#a0a0a0] mb-1"
               >
                 Email Address
               </label>
@@ -122,7 +119,7 @@ export default function AuthPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-300 mb-1"
+                className="block text-sm font-medium text-[#a0a0a0] mb-1"
               >
                 Password
               </label>
@@ -134,8 +131,9 @@ export default function AuthPage() {
                 placeholder="••••••••"
                 className="input-dark"
                 required
-                minLength={6}
+                minLength={8}
               />
+              <p className="text-xs text-[#666666] mt-1">Minimum 8 characters for security</p>
             </div>
 
             {/* Submit button */}
@@ -159,13 +157,13 @@ export default function AuthPage() {
 
           {/* Toggle mode */}
           <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-[#666666] text-sm">
               {mode === "login"
                 ? "Don't have an account?"
                 : "Already have an account?"}{" "}
               <button
                 onClick={toggleMode}
-                className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                className="text-[#00d4ff] hover:text-[#00e5ff] font-medium transition-colors"
               >
                 {mode === "login" ? "Sign up" : "Sign in"}
               </button>
@@ -174,7 +172,7 @@ export default function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-gray-500 text-sm mt-6">
+        <p className="text-center text-[#444444] text-sm mt-6">
           © 2025 NexusConnect. All rights reserved.
         </p>
       </div>

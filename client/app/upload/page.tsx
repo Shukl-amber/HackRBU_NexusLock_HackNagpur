@@ -222,11 +222,8 @@ export default function UploadPage() {
             >
               ← Back
             </button>
-            <div className="w-10 h-10 bg-[#00d4ff] rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold text-lg">NC</span>
-            </div>
             <h1 className="text-xl font-semibold text-white">
-              Upload Documents
+              NexusConnect - Upload Documents
             </h1>
           </div>
 
@@ -239,17 +236,18 @@ export default function UploadPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        {/* Drop Zone */}
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-            isDragOver
-              ? "border-[#00d4ff] bg-[#00d4ff]/10"
-              : "border-[#333333] hover:border-[#444444]"
-          }`}
-        >
+       {/* Drop Zone */}
+         <div
+           data-testid="file-drop-zone"
+           onDragOver={handleDragOver}
+           onDragLeave={handleDragLeave}
+           onDrop={handleDrop}
+           className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+             isDragOver
+               ? "border-[#00d4ff] bg-[#00d4ff]/10"
+               : "border-[#333333] hover:border-[#444444]"
+           }`}
+         >
           <div className="text-5xl mb-4 text-[#666666]">📄</div>
           <h2 className="text-lg font-semibold text-white mb-2">
             Drag & Drop your documents here
@@ -257,14 +255,15 @@ export default function UploadPage() {
           <p className="text-[#666666] mb-4">
             Supports PDF, JPG, PNG up to 10MB
           </p>
-          <label className="inline-block">
-            <input
-              type="file"
-              multiple
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => e.target.files && handleFiles(e.target.files)}
-              className="hidden"
-            />
+           <label className="inline-block">
+             <input
+               type="file"
+               multiple
+               accept=".pdf,.jpg,.jpeg,.png"
+               onChange={(e) => e.target.files && handleFiles(e.target.files)}
+               className="hidden"
+               data-testid="browse-files-input"
+             />
             <span className="btn-primary cursor-pointer">
               Browse Files
             </span>
@@ -278,14 +277,15 @@ export default function UploadPage() {
               <h3 className="text-lg font-semibold text-white">
                 Uploaded Files ({files.length})
               </h3>
-              {pendingCount > 0 && (
-                <button
-                  onClick={processAllFiles}
-                  className="btn-primary"
-                >
-                  Generate All Proofs
-                </button>
-              )}
+               {pendingCount > 0 && (
+                 <button
+                   onClick={processAllFiles}
+                   className="btn-primary"
+                   data-testid="generate-all-button"
+                 >
+                   Generate All Proofs
+                 </button>
+               )}
             </div>
 
             <div className="space-y-3">
@@ -318,15 +318,16 @@ export default function UploadPage() {
 
                       {fileData.status === "pending" && (
                         <div className="space-y-3">
-                          <select
-                            value={fileData.docType || ""}
-                            onChange={(e) =>
-                              updateFile(fileData.id, {
-                                docType: e.target.value as DocType,
-                              })
-                            }
-                            className="input-dark"
-                          >
+                           <select
+                             value={fileData.docType || ""}
+                             onChange={(e) =>
+                               updateFile(fileData.id, {
+                                 docType: e.target.value as DocType,
+                               })
+                             }
+                             className="input-dark"
+                             data-testid="doc-type-select"
+                           >
                             <option value="">Select Document Type</option>
                             {docTypes.map((type) => (
                               <option key={type} value={type}>
@@ -335,35 +336,38 @@ export default function UploadPage() {
                             ))}
                           </select>
 
-                          <input
-                            type="text"
-                            value={fileData.purpose}
-                            onChange={(e) =>
-                              updateFile(fileData.id, { purpose: e.target.value })
-                            }
-                            placeholder="Purpose (e.g., Tax filing)"
-                            className="input-dark"
-                          />
+                           <input
+                             type="text"
+                             value={fileData.purpose}
+                             onChange={(e) =>
+                               updateFile(fileData.id, { purpose: e.target.value })
+                             }
+                             placeholder="Purpose (e.g., Tax filing)"
+                             className="input-dark"
+                             data-testid="purpose-input"
+                           />
 
-                          <input
-                            type="text"
-                            value={fileData.requester}
-                            onChange={(e) =>
-                              updateFile(fileData.id, { requester: e.target.value })
-                            }
-                            placeholder="Requester (e.g., tax.gov.in)"
-                            className="input-dark"
-                          />
+                           <input
+                             type="text"
+                             value={fileData.requester}
+                             onChange={(e) =>
+                               updateFile(fileData.id, { requester: e.target.value })
+                             }
+                             placeholder="Requester (e.g., tax.gov.in)"
+                             className="input-dark"
+                             data-testid="requester-input"
+                           />
 
-                          <textarea
-                            value={fileData.docData}
-                            onChange={(e) =>
-                              updateFile(fileData.id, { docData: e.target.value })
-                            }
-                            placeholder="Document data"
-                            rows={3}
-                            className="input-dark resize-none"
-                          />
+                           <textarea
+                             value={fileData.docData}
+                             onChange={(e) =>
+                               updateFile(fileData.id, { docData: e.target.value })
+                             }
+                             placeholder="Document data"
+                             rows={3}
+                             className="input-dark resize-none"
+                             data-testid="doc-data-textarea"
+                           />
                         </div>
                       )}
 
@@ -417,18 +421,19 @@ export default function UploadPage() {
                       )}
                     </div>
 
-                    {fileData.status === "pending" &&
-                      fileData.docType &&
-                      fileData.purpose &&
-                      fileData.requester &&
-                      fileData.docData && (
-                        <button
-                          onClick={() => processFile(fileData)}
-                          className="btn-primary text-sm flex-shrink-0"
-                        >
-                          Generate
-                        </button>
-                      )}
+                       {fileData.status === "pending" &&
+                       fileData.docType &&
+                       fileData.purpose &&
+                       fileData.requester &&
+                       fileData.docData && (
+                         <button
+                           onClick={() => processFile(fileData)}
+                           className="btn-primary text-sm flex-shrink-0"
+                           data-testid="generate-proof-button"
+                         >
+                           Generate
+                         </button>
+                       )}
                   </div>
                 </div>
               ))}
@@ -438,10 +443,10 @@ export default function UploadPage() {
 
         {/* Info Card */}
         <div className="mt-8 card p-6">
-          <h3 className="font-semibold text-cyan-400 mb-2">
+          <h3 className="font-semibold text-[#00d4ff] mb-2">
             How Zero-Knowledge Proofs Work
           </h3>
-          <ul className="text-sm text-gray-400 space-y-1">
+          <ul className="text-sm text-[#666666] space-y-1">
             <li>• Your document is processed locally</li>
             <li>• A cryptographic proof verifies your document</li>
             <li>• Third parties verify without seeing your data</li>

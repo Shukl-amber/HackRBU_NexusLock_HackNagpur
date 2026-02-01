@@ -8,8 +8,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: nexus_connect
-    volumes:
-      - timescaledb_data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data
     networks:
       - nexus-connect-network
     healthcheck:
@@ -28,8 +28,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: nexus_connect_private
-    volumes:
-      - postgres_private_data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data
     networks:
       - nexus-connect-network
     healthcheck:
@@ -44,8 +44,8 @@ services:
     container_name: nexus-connect-redis
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
+    entrypoint: ["redis-server"]
+    command: ["--save", "", "--appendonly", "no", "--dir", "/tmp"]
     networks:
       - nexus-connect-network
     healthcheck:
@@ -82,11 +82,3 @@ services:
 networks:
   nexus-connect-network:
     driver: bridge
-
-volumes:
-  timescaledb_data:
-    driver: local
-  postgres_private_data:
-    driver: local
-  redis_data:
-    driver: local

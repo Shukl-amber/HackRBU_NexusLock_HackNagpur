@@ -92,34 +92,60 @@ export const loginUser = async (data: LoginRequest): Promise<AuthResponse> => {
 };
 
 export const signupUser = async (data: SignupRequest): Promise<AuthResponse> => {
-  try {
-    const response = await axios.post(`${API_URL}/api/v1/auth/signup`, data);
-    
-    const { access_token, user } = response.data;
-    
-    // Store token and user in localStorage
-    setToken(access_token);
-    setStoredUser(user);
-    
-    return {
-      success: true,
-      message: "Account created successfully!",
-      user,
-      token: access_token,
-    };
-  } catch (error) {
-     if (axios.isAxiosError(error) && error.response) {
-       return {
-         success: false,
-         message: error.response.data?.detail || error.response.data?.message || "Signup failed. Please try again.",
-       };
-     }
-    return {
-      success: false,
-      message: "Network error. Please check your connection.",
-    };
-  }
-};
+   try {
+     const response = await axios.post(`${API_URL}/api/v1/auth/signup`, data);
+     
+     const { access_token, user } = response.data;
+     
+     // Store token and user in localStorage
+     setToken(access_token);
+     setStoredUser(user);
+     
+     return {
+       success: true,
+       message: "Account created successfully!",
+       user,
+       token: access_token,
+     };
+   } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorData = error.response.data;
+        let errorMessage = "Signup failed. Please try again.";
+        
+        // Handle Pydantic validation errors (structured errors array)
+        if (Array.isArray(errorData.errors)) {
+          const validationErrors = errorData.errors
+            .map((err: any) => err.msg || err.detail || JSON.stringify(err))
+            .join("; ");
+          errorMessage = validationErrors || errorMessage;
+        } 
+        // Handle Pydantic validation errors (list of details)
+        else if (Array.isArray(errorData.detail)) {
+          const validationErrors = errorData.detail
+            .map((err: any) => err.msg || err.detail || err)
+            .join("; ");
+          errorMessage = validationErrors || errorMessage;
+        } 
+        // Handle single error detail (string)
+        else if (typeof errorData.detail === "string") {
+          errorMessage = errorData.detail;
+        }
+        // Handle message field
+        else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        return {
+          success: false,
+          message: errorMessage,
+        };
+      }
+     return {
+       success: false,
+       message: "Network error. Please check your connection.",
+     };
+   }
+ };
 
 export const validateToken = async (): Promise<AuthResponse> => {
   const token = getToken();

@@ -47,17 +47,17 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-dark flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-rose-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 glow-cyan">
+          <div className="w-20 h-20 bg-[#ff4444] rounded-2xl flex items-center justify-center mx-auto mb-4 glow-cyan">
             <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-100 mb-2">Admin Access</h1>
-          <p className="text-gray-400">NexusConnect Administration Portal</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Access</h1>
+          <p className="text-[#666666]">NexusConnect Administration Portal</p>
         </div>
 
         <div className="card-hover p-8">
-          <h2 className="text-xl font-semibold text-gray-100 text-center mb-6">
+          <h2 className="text-xl font-semibold text-white text-center mb-6">
             Administrator Login
           </h2>
 
@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-medium text-gray-300 mb-2"
+                className="block text-sm font-medium text-[#a0a0a0] mb-2"
               >
                 Username
               </label>
@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-300 mb-2"
+                className="block text-sm font-medium text-[#a0a0a0] mb-2"
               >
                 Password
               </label>
@@ -119,8 +119,8 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-800">
-            <p className="text-center text-gray-500 text-sm flex items-center justify-center gap-2">
+          <div className="mt-6 pt-6 border-t border-[#222222]">
+            <p className="text-center text-[#444444] text-sm flex items-center justify-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -129,7 +129,7 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        <p className="text-center text-gray-500 text-sm mt-6">
+        <p className="text-center text-[#444444] text-sm mt-6">
           © 2025 NexusConnect. All rights reserved.
         </p>
       </div>
