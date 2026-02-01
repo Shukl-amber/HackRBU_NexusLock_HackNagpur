@@ -172,7 +172,18 @@ export const getApiKeys = async (): Promise<ApiKey[]> => {
     },
   });
   
-  return response.data;
+  // Backend returns { api_keys: [...] }
+  const apiKeys = response.data.api_keys || [];
+  
+  // Map backend format to frontend format
+  return apiKeys.map((key: any) => ({
+    id: key.key_id,
+    name: key.name,
+    key: key.key_prefix,
+    domain: key.domain,
+    created_at: key.created_at,
+    is_active: !key.revoked,
+  }));
 };
 
 export const createApiKey = async (data: CreateApiKeyRequest): Promise<ApiKey> => {
@@ -185,5 +196,14 @@ export const createApiKey = async (data: CreateApiKeyRequest): Promise<ApiKey> =
     },
   });
   
-  return response.data;
+  const key = response.data;
+  
+  return {
+    id: key.key_id,
+    name: key.name,
+    key: key.full_key || key.key_prefix,
+    domain: key.domain,
+    created_at: key.created_at,
+    is_active: !key.revoked,
+  };
 };
