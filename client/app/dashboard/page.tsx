@@ -24,20 +24,14 @@ export default function DashboardPage() {
   const router = useRouter();
   const toast = useToast();
 
-  // Data state
   const [proofs, setProofs] = useState<Proof[]>([]);
   const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastSync, setLastSync] = useState<Date>(new Date());
-
-  // Filter state
   const [logFilter, setLogFilter] = useState<"all" | "today" | "week">("all");
-
-  // Modal state
   const [selectedLog, setSelectedLog] = useState<AccessLog | null>(null);
 
-  // Fetch data
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -51,28 +45,24 @@ export default function DashboardPage() {
       setPendingRequests(requestsData);
       setLastSync(new Date());
     } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-      toast.error("Failed to fetch dashboard data. Please try again.");
+      toast.error("Failed to fetch dashboard data");
     } finally {
       setIsLoading(false);
     }
   }, [logFilter, toast]);
 
-  // Protect route
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push("/auth");
     }
   }, [isAuthenticated, authLoading, router]);
 
-  // Fetch data on mount
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
     }
   }, [isAuthenticated, fetchData]);
 
-  // Handlers
   const handleRevoke = async (proofId: string) => {
     try {
       const result = await revokeProof(proofId);
@@ -80,49 +70,44 @@ export default function DashboardPage() {
         setProofs((prev) =>
           prev.map((p) => (p.id === proofId ? { ...p, status: "revoked" } : p))
         );
-        toast.success("Proof revoked successfully");
+        toast.success("Proof revoked");
       } else {
         toast.error(result.message);
       }
     } catch (error) {
-      console.error("Failed to revoke proof:", error);
-      toast.error("Failed to revoke proof. Please try again.");
+      toast.error("Failed to revoke proof");
     }
   };
 
   const handleRevokeAll = async () => {
-    if (!confirm("Are you sure you want to revoke all active proofs?")) return;
+    if (!confirm("Revoke all active proofs?")) return;
     try {
       const result = await revokeAllProofs();
       if (result.success) {
         setProofs((prev) =>
           prev.map((p) => (p.status === "active" ? { ...p, status: "revoked" } : p))
         );
-        toast.success(result.message);
-      } else {
-        toast.error("Failed to revoke proofs");
+        toast.success("All proofs revoked");
       }
     } catch (error) {
-      console.error("Failed to revoke all proofs:", error);
-      toast.error("Failed to revoke all proofs. Please try again.");
+      toast.error("Failed to revoke proofs");
     }
   };
 
-   const handleExportCSV = () => {
-     const csv = exportToCSV(proofs);
-     downloadCSV(csv, `nexus-connect-proofs-${Date.now()}.csv`);
-     toast.success("Proofs exported to CSV");
-   };
+  const handleExportCSV = () => {
+    const csv = exportToCSV(proofs);
+    downloadCSV(csv, `nexus-connect-proofs-${Date.now()}.csv`);
+    toast.success("Exported to CSV");
+  };
 
   const activeProofs = proofs.filter((p) => p.status === "active");
 
-  // Loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500">Loading...</p>
+          <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -131,55 +116,53 @@ export default function DashboardPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+    <div className="min-h-screen bg-gradient-dark">
+      {/* Header */}
+      <header className="bg-gray-900/50 border-b border-gray-800 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* Left: Logo + Title */}
-             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                 <span className="text-white font-bold text-lg">NC</span>
-               </div>
-               <div>
-                 <h1 className="text-xl font-semibold text-gray-900">
-                   NexusConnect Dashboard
-                 </h1>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">NC</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-100">
+                  NexusConnect Dashboard
+                </h1>
                 <p className="text-xs text-gray-500">
                   Last sync: {formatTime(lastSync.toISOString())}
                 </p>
               </div>
             </div>
 
-            {/* Right: Actions */}
             <div className="flex items-center gap-3">
               <button
                 onClick={() => router.push("/upload")}
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary text-sm"
               >
                 + Upload Document
               </button>
               <button
                 onClick={handleExportCSV}
-                className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="btn-secondary text-sm"
               >
                 Export CSV
               </button>
               <button
                 onClick={handleRevokeAll}
                 disabled={activeProofs.length === 0}
-                className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-danger text-sm disabled:opacity-50"
               >
-                Revoke All Active
+                Revoke All
               </button>
-              <div className="h-6 w-px bg-gray-300" />
+              <div className="h-6 w-px bg-gray-700" />
               <div className="text-right">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-300">
                   {user?.name || user?.email}
                 </p>
                 <button
                   onClick={logout}
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs text-cyan-400 hover:text-cyan-300"
                 >
                   Logout
                 </button>
@@ -189,14 +172,34 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* SECTION 2: ACTIVE PROOFS (40% height - Most Important) */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Active Proofs{" "}
-              <span className="text-sm font-normal text-gray-500">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="card p-4">
+            <p className="text-gray-400 text-sm">Active Proofs</p>
+            <p className="text-2xl font-bold text-cyan-400">{activeProofs.length}</p>
+          </div>
+          <div className="card p-4">
+            <p className="text-gray-400 text-sm">Total Proofs</p>
+            <p className="text-2xl font-bold text-gray-100">{proofs.length}</p>
+          </div>
+          <div className="card p-4">
+            <p className="text-gray-400 text-sm">Access Events</p>
+            <p className="text-2xl font-bold text-emerald-400">{accessLogs.length}</p>
+          </div>
+          <div className="card p-4">
+            <p className="text-gray-400 text-sm">Pending Requests</p>
+            <p className="text-2xl font-bold text-amber-400">{pendingRequests.length}</p>
+          </div>
+        </div>
+
+        {/* Active Proofs Section */}
+        <section className="card">
+          <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-100">
+              Active Proofs
+              <span className="text-sm font-normal text-gray-500 ml-2">
                 ({activeProofs.length} active)
               </span>
             </h2>
@@ -204,73 +207,49 @@ export default function DashboardPage() {
 
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           ) : proofs.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-gray-500">
-                No proofs yet. Upload your first document!
-              </p>
+              <p className="text-gray-400">No proofs yet. Upload your first document!</p>
               <button
                 onClick={() => router.push("/upload")}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary mt-4"
               >
                 Upload Document
               </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
+              <table className="table-dark">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Doc Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Purpose
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Requester
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Expires
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Action
-                    </th>
+                    <th>Document</th>
+                    <th>Purpose</th>
+                    <th>Requester</th>
+                    <th>Expires</th>
+                    <th>Status</th>
+                    <th className="text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody>
                   {proofs.map((proof) => (
-                    <tr key={proof.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-xl mr-2">
-                          {getDocIcon(proof.docType)}
-                        </span>
-                        <span className="text-sm font-medium text-gray-900">
-                          {proof.docType}
-                        </span>
+                    <tr key={proof.id}>
+                      <td className="flex items-center gap-2">
+                        <span className="text-xl">{getDocIcon(proof.docType)}</span>
+                        <span className="font-medium text-gray-100">{proof.docType}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {proof.purpose}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {proof.requester}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {formatDateTime(proof.expires)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td>{proof.purpose}</td>
+                      <td>{proof.requester}</td>
+                      <td>{formatDateTime(proof.expires)}</td>
+                      <td>
                         <StatusBadge status={proof.status} />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="text-right">
                         {proof.status === "active" && (
                           <button
                             onClick={() => handleRevoke(proof.id)}
-                            className="text-red-600 hover:text-red-700 text-sm font-medium"
+                            className="text-rose-400 hover:text-rose-300 text-sm font-medium"
                           >
                             Revoke
                           </button>
@@ -284,12 +263,12 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* SECTION 3: ACCESS LOGS (30% height) */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Recent Access{" "}
-              <span className="text-sm font-normal text-gray-500">
+        {/* Access Logs Section */}
+        <section className="card">
+          <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-100">
+              Access Logs
+              <span className="text-sm font-normal text-gray-500 ml-2">
                 ({accessLogs.length} events)
               </span>
             </h2>
@@ -300,15 +279,11 @@ export default function DashboardPage() {
                   onClick={() => setLogFilter(filter)}
                   className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                     logFilter === filter
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                      : "text-gray-400 hover:bg-gray-800"
                   }`}
                 >
-                  {filter === "all"
-                    ? "All"
-                    : filter === "today"
-                    ? "Today"
-                    : "This Week"}
+                  {filter === "all" ? "All" : filter === "today" ? "Today" : "This Week"}
                 </button>
               ))}
             </div>
@@ -316,39 +291,35 @@ export default function DashboardPage() {
 
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           ) : accessLogs.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-400">
               No access logs for this period
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-800">
               {accessLogs.map((log) => (
                 <div
                   key={log.id}
-                  className="px-6 py-4 flex items-center justify-between hover:bg-gray-50"
+                  className="px-6 py-4 flex items-center justify-between hover:bg-gray-800/30"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg">
+                    <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-lg">
                       {getActionIcon(log.action)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {log.domain}
-                      </p>
+                      <p className="text-sm font-medium text-gray-100">{log.domain}</p>
                       <p className="text-xs text-gray-500">
                         {log.action} {log.docType}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-500">
-                      {formatTime(log.timestamp)}
-                    </span>
+                    <span className="text-sm text-gray-500">{formatTime(log.timestamp)}</span>
                     <button
                       onClick={() => setSelectedLog(log)}
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-sm text-cyan-400 hover:text-cyan-300"
                     >
                       Details
                     </button>
@@ -359,29 +330,29 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* SECTION 4: PENDING REQUESTS (20% height) */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Pending Requests{" "}
-              <span className="text-sm font-normal text-gray-500">
+        {/* Pending Requests Section */}
+        <section className="card">
+          <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-100">
+              Pending Requests
+              <span className="text-sm font-normal text-gray-500 ml-2">
                 ({pendingRequests.length})
               </span>
             </h2>
             <button
               onClick={fetchData}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-cyan-400 hover:text-cyan-300"
             >
               Refresh
             </button>
           </div>
 
           {pendingRequests.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              No new consent requests waiting
+            <div className="p-8 text-center text-gray-400">
+              No pending consent requests
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-800">
               {pendingRequests.map((req) => (
                 <div
                   key={req.id}
@@ -390,17 +361,15 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-4">
                     <span className="text-xl">{getDocIcon(req.docType)}</span>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {req.requester}
-                      </p>
+                      <p className="text-sm font-medium text-gray-100">{req.requester}</p>
                       <p className="text-xs text-gray-500">{req.purpose}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    <button className="px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-500">
                       Approve
                     </button>
-                    <button className="px-3 py-1.5 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50">
+                    <button className="px-3 py-1.5 text-sm font-medium text-rose-400 border border-rose-500/30 rounded-lg hover:bg-rose-500/10">
                       Deny
                     </button>
                   </div>
@@ -411,49 +380,47 @@ export default function DashboardPage() {
         </section>
       </main>
 
-      {/* DETAILS MODAL */}
+      {/* Details Modal */}
       {selectedLog && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedLog(null)}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6"
+            className="card max-w-lg w-full p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Access Log Details
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-100">Access Log Details</h3>
               <button
                 onClick={() => setSelectedLog(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-200"
               >
                 ✕
               </button>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Domain</span>
-                <span className="text-sm font-medium">{selectedLog.domain}</span>
+                <span className="text-sm text-gray-400">Domain</span>
+                <span className="text-sm font-medium text-gray-100">{selectedLog.domain}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Action</span>
-                <span className="text-sm font-medium">{selectedLog.action}</span>
+                <span className="text-sm text-gray-400">Action</span>
+                <span className="text-sm font-medium text-gray-100">{selectedLog.action}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Document</span>
-                <span className="text-sm font-medium">{selectedLog.docType}</span>
+                <span className="text-sm text-gray-400">Document</span>
+                <span className="text-sm font-medium text-gray-100">{selectedLog.docType}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Time</span>
-                <span className="text-sm font-medium">
+                <span className="text-sm text-gray-400">Time</span>
+                <span className="text-sm font-medium text-gray-100">
                   {formatDateTime(selectedLog.timestamp)}
                 </span>
               </div>
-              <div className="pt-3 border-t border-gray-200">
-                <p className="text-sm text-gray-500 mb-2">Full Details</p>
-                <pre className="bg-gray-100 p-3 rounded-lg text-xs overflow-auto max-h-40">
+              <div className="pt-3 border-t border-gray-800">
+                <p className="text-sm text-gray-400 mb-2">Full Details</p>
+                <pre className="bg-gray-900 p-3 rounded-lg text-xs overflow-auto max-h-40 text-gray-300">
                   {JSON.stringify(selectedLog.details, null, 2)}
                 </pre>
               </div>
@@ -465,18 +432,15 @@ export default function DashboardPage() {
   );
 }
 
-// Status Badge Component
 function StatusBadge({ status }: { status: Proof["status"] }) {
   const styles = {
-    active: "bg-green-100 text-green-800",
-    expired: "bg-yellow-100 text-yellow-800",
-    revoked: "bg-red-100 text-red-800",
+    active: "badge-success",
+    expired: "badge-warning",
+    revoked: "badge-danger",
   };
 
   return (
-    <span
-      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${styles[status]}`}
-    >
+    <span className={styles[status]}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
