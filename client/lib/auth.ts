@@ -77,13 +77,13 @@ export const loginUser = async (data: LoginRequest): Promise<AuthResponse> => {
   } catch (error) {
     console.error("Login error:", error);
     
-    if (axios.isAxiosError(error) && error.response) {
-      console.error("Error response:", error.response.data);
-      return {
-        success: false,
-        message: error.response.data.detail || "Invalid credentials. Please try again.",
-      };
-    }
+     if (axios.isAxiosError(error) && error.response) {
+       console.error("Error response:", error.response.data);
+       return {
+         success: false,
+         message: error.response.data?.detail || error.response.data?.message || "Invalid credentials. Please try again.",
+       };
+     }
     return {
       success: false,
       message: "Network error. Please check your connection.",
@@ -108,12 +108,12 @@ export const signupUser = async (data: SignupRequest): Promise<AuthResponse> => 
       token: access_token,
     };
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        success: false,
-        message: error.response.data.detail || "Signup failed. Please try again.",
-      };
-    }
+     if (axios.isAxiosError(error) && error.response) {
+       return {
+         success: false,
+         message: error.response.data?.detail || error.response.data?.message || "Signup failed. Please try again.",
+       };
+     }
     return {
       success: false,
       message: "Network error. Please check your connection.",
