@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# ConsentVault DPI - Windows/WSL Setup Script
-# This script sets up the project in WSL, avoiding /mnt/c/ permission issues with PostgreSQL
+# ConsentVault DPI - Automated Setup Script
+# This script sets up the project entirely within Docker
 
 set -e
 
@@ -13,7 +13,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}ConsentVault DPI - Windows/WSL Setup${NC}"
+echo -e "${BLUE}ConsentVault DPI - Automated Setup${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 # Check if we're in WSL
@@ -143,6 +143,12 @@ else
     echo -e "${GREEN}✓ .env file already exists${NC}\n"
 fi
 
+# Step 2.1: Ensure docker_data is ignored
+if ! grep -q "docker_data/" .gitignore; then
+    echo -e "${BLUE}Adding docker_data/ to .gitignore...${NC}"
+    echo -e "\n# Local data\ndocker_data/" >> .gitignore
+fi
+
 # Step 3: Start Docker services
 echo -e "${YELLOW}[3/7] Starting Docker services...${NC}"
 
@@ -162,22 +168,23 @@ fi
 
 echo -e "${BLUE}Using: $DOCKER_COMPOSE${NC}"
 
-# Start services
-$DOCKER_COMPOSE up -d
+# Build and start services
+$DOCKER_COMPOSE up -d --build
 
 echo -e "${GREEN}✓ Docker services started${NC}\n"
 
-# Step 4: Wait for databases
-echo -e "${YELLOW}[4/7] Waiting for databases to initialize...${NC}"
-echo -e "${BLUE}This may take 20-30 seconds on first run...${NC}"
+# Step 4: Wait for databases and server
+echo -e "${YELLOW}[4/7] Waiting for services to initialize...${NC}"
+echo -e "${BLUE}This may take 30-40 seconds on first run...${NC}"
 
-MAX_RETRIES=30
+MAX_RETRIES=60
 RETRY_COUNT=0
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     if $DOCKER_COMPOSE exec -T timescaledb pg_isready -U postgres &> /dev/null && \
-       $DOCKER_COMPOSE exec -T postgres-private pg_isready -U postgres &> /dev/null; then
-        echo -e "${GREEN}✓ Databases are ready${NC}\n"
+       $DOCKER_COMPOSE exec -T postgres-private pg_isready -U postgres &> /dev/null && \
+       $DOCKER_COMPOSE exec -T server curl -s http://localhost:8000/health &> /dev/null; then
+        echo -e "${GREEN}✓ All services are ready${NC}\n"
         break
     fi
     
@@ -187,95 +194,36 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
 done
 
 if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-    echo -e "\n${RED}✗ Databases failed to start within timeout${NC}"
+    echo -e "\n${RED}✗ Services failed to start within timeout${NC}"
     echo -e "${YELLOW}Check logs with: $DOCKER_COMPOSE logs${NC}\n"
     exit 1
 fi
 
-# Step 5: Install Python dependencies
-echo -e "${YELLOW}[5/7] Installing Python dependencies...${NC}"
-
-# Create virtual environment if it doesn't exist
-if [ ! -d ".venv" ]; then
-    echo -e "${BLUE}Creating virtual environment...${NC}"
-    python3 -m venv .venv
-fi
-
-# Activate virtual environment
-source .venv/bin/activate
-
-# Upgrade pip
-pip install --upgrade pip &> /dev/null
-
-# Install dependencies
-pip install -r requirements.txt
-
-echo -e "${GREEN}✓ Python dependencies installed${NC}\n"
+# Step 5: (Skipped) Local Python dependencies
+echo -e "${YELLOW}[5/7] Python dependencies are managed within Docker.${NC}"
+echo -e "${GREEN}✓ Skipping local installation${NC}\n"
 
 # Step 6: Run database migrations
 echo -e "${YELLOW}[6/7] Running database migrations...${NC}"
 
-# Check if databases are accessible
-if ! $DOCKER_COMPOSE exec -T timescaledb psql -U postgres -d consentvault -c "SELECT 1;" &> /dev/null; then
-    echo -e "${BLUE}Creating public database...${NC}"
-    $DOCKER_COMPOSE exec -T timescaledb psql -U postgres -c "CREATE DATABASE consentvault;" || true
-fi
-
-if ! $DOCKER_COMPOSE exec -T postgres-private psql -U postgres -d consentvault_private -c "SELECT 1;" &> /dev/null; then
-    echo -e "${BLUE}Creating private database...${NC}"
-    $DOCKER_COMPOSE exec -T postgres-private psql -U postgres -c "CREATE DATABASE consentvault_private;" || true
-fi
+# Databases are already created by server health checks or env config usually, 
+# but let's ensure they exist as the server expects them.
+$DOCKER_COMPOSE exec -T timescaledb psql -U postgres -c "CREATE DATABASE consentvault;" || true
+$DOCKER_COMPOSE exec -T postgres-private psql -U postgres -c "CREATE DATABASE consentvault_private;" || true
 
 # Enable TimescaleDB extension
 $DOCKER_COMPOSE exec -T timescaledb psql -U postgres -d consentvault -c "CREATE EXTENSION IF NOT EXISTS timescaledb;" || true
 
-# Run migrations
-alembic upgrade head
+# Run migrations via Docker
+$DOCKER_COMPOSE exec -T server alembic upgrade head
 
 echo -e "${GREEN}✓ Database migrations completed${NC}\n"
 
 # Step 7: Seed data
 echo -e "${YELLOW}[7/7] Seeding initial data...${NC}"
 
-# Start FastAPI server in background temporarily for seeding
-echo -e "${BLUE}Starting FastAPI server for seeding...${NC}"
-
-# Start server in background
-uvicorn app.main:app --host 0.0.0.0 --port 8000 &> /tmp/consentvault-server.log &
-SERVER_PID=$!
-
-# Wait for server to start
-echo -n "Waiting for server to start"
-MAX_WAIT=30
-WAIT_COUNT=0
-
-while [ $WAIT_COUNT -lt $MAX_WAIT ]; do
-    if curl -s http://localhost:8000/health &> /dev/null; then
-        echo -e "\n${GREEN}✓ Server started${NC}"
-        break
-    fi
-    
-    WAIT_COUNT=$((WAIT_COUNT + 1))
-    echo -n "."
-    sleep 1
-done
-
-if [ $WAIT_COUNT -eq $MAX_WAIT ]; then
-    echo -e "\n${RED}✗ Server failed to start${NC}"
-    echo -e "${YELLOW}Check logs at /tmp/consentvault-server.log${NC}\n"
-    kill $SERVER_PID 2>/dev/null || true
-    exit 1
-fi
-
-# Run seed script
+# Run seed script (it now uses Docker internally for DB calls and hits the server)
 bash scripts/seed-data.sh
-
-# Run QA tests
-echo -e "\n${YELLOW}Running QA tests...${NC}\n"
-bash scripts/qa-tests.sh
-
-# Stop temporary server
-kill $SERVER_PID 2>/dev/null || true
 
 # Summary
 echo -e "\n${BLUE}========================================${NC}"
@@ -283,20 +231,17 @@ echo -e "${GREEN}✓ Setup completed successfully!${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 echo -e "Next steps:"
-echo -e "1. ${YELLOW}Activate virtual environment:${NC}"
-echo -e "   ${GREEN}source .venv/bin/activate${NC}"
-echo -e ""
-echo -e "2. ${YELLOW}Start the FastAPI server:${NC}"
-echo -e "   ${GREEN}uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload${NC}"
-echo -e ""
-echo -e "3. ${YELLOW}Access the API:${NC}"
+echo -e "1. ${YELLOW}Access the API:${NC}"
 echo -e "   ${GREEN}http://localhost:8000${NC}"
 echo -e "   ${GREEN}http://localhost:8000/docs${NC} (Swagger UI)"
 echo -e ""
-echo -e "4. ${YELLOW}View logs:${NC}"
+echo -e "2. ${YELLOW}Run tests:${NC}"
+echo -e "   ${GREEN}bash scripts/qa-tests.sh${NC}"
+echo -e ""
+echo -e "3. ${YELLOW}View logs:${NC}"
 echo -e "   ${GREEN}$DOCKER_COMPOSE logs -f${NC}"
 echo -e ""
-echo -e "5. ${YELLOW}Stop services:${NC}"
+echo -e "4. ${YELLOW}Stop services:${NC}"
 echo -e "   ${GREEN}$DOCKER_COMPOSE down${NC}"
 echo -e ""
 

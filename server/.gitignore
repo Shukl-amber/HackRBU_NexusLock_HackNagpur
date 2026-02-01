@@ -48,6 +48,9 @@ ENV/
 htmlcov/
 .tox/
 
+# Local data
+docker_data/
+
 # Logs
 *.log
 logs/

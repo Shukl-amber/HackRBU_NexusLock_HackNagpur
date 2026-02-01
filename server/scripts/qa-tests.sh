@@ -77,8 +77,8 @@ print_header "Test 1: Health Check"
 print_test "GET /health"
 HEALTH_RESPONSE=$(curl -s "$BASE_URL/health")
 check_response "$HEALTH_RESPONSE" '"status":"healthy"' "Health endpoint returns healthy status"
-check_response "$HEALTH_RESPONSE" '"public_db":"connected"' "Public database is connected"
-check_response "$HEALTH_RESPONSE" '"private_db":"connected"' "Private database is connected"
+check_response "$HEALTH_RESPONSE" '"public":"connected"' "Public database is connected"
+check_response "$HEALTH_RESPONSE" '"private":"connected"' "Private database is connected"
 check_response "$HEALTH_RESPONSE" '"redis":"connected"' "Redis is connected"
 
 # Test 2: Admin Login

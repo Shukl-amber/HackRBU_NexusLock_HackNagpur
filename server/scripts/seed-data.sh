@@ -25,25 +25,34 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}ConsentVault DPI - Seed Data Script${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
-# Check if PostgreSQL client is available
-if ! command -v psql &> /dev/null; then
-    echo -e "${RED}Error: psql (PostgreSQL client) is not installed.${NC}"
-    echo -e "${YELLOW}For Docker-based setup, use:${NC}"
-    echo -e "  docker-compose exec timescaledb psql -U postgres -d consentvault"
+# Only use Docker Compose
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif docker-compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    echo -e "${RED}Error: Docker Compose is not installed.${NC}"
     exit 1
 fi
 
-# Function to execute SQL
+# Check for required host tools
+MISSING_DEPS=()
+if ! command -v jq &> /dev/null; then
+    MISSING_DEPS+=("jq")
+fi
+if ! command -v curl &> /dev/null; then
+    MISSING_DEPS+=("curl")
+fi
+
+if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
+    echo -e "${RED}Error: Missing required host dependencies: ${MISSING_DEPS[*]}${NC}"
+    exit 1
+fi
+
+# Function to execute SQL via Docker
 exec_sql() {
     local sql="$1"
-    PGPASSWORD="${PUBLIC_DB_PASSWORD:-postgres}" psql -h "$PUBLIC_DB_HOST" -p "$PUBLIC_DB_PORT" \
-        -U "$PUBLIC_DB_USER" -d "$PUBLIC_DB_NAME" -c "$sql" 2>&1
-}
-
-# Function to execute SQL via Docker (fallback)
-exec_sql_docker() {
-    local sql="$1"
-    docker-compose exec -T timescaledb psql -U postgres -d consentvault -c "$sql" 2>&1
+    $DOCKER_COMPOSE_CMD exec -T timescaledb psql -U postgres -d consentvault -c "$sql" 2>&1
 }
 
 # Seed Trusted Domains
@@ -60,13 +69,7 @@ DOMAINS=(
 for domain in "${DOMAINS[@]}"; do
     SQL="INSERT INTO trusted_domains (domain) VALUES ('$domain') ON CONFLICT DO NOTHING;"
     
-    # Try direct psql first
-    if command -v psql &> /dev/null && [ -z "$USE_DOCKER" ]; then
-        RESULT=$(exec_sql "$SQL" 2>&1)
-    else
-        # Fallback to Docker
-        RESULT=$(exec_sql_docker "$SQL" 2>&1)
-    fi
+    RESULT=$(exec_sql "$SQL")
     
     if echo "$RESULT" | grep -q "ERROR"; then
         echo -e "${RED}  ✗ Failed to add $domain${NC}"
@@ -80,11 +83,7 @@ echo ""
 
 # Verify trusted domains
 echo -e "${YELLOW}[2/3] Verifying trusted domains...${NC}"
-if command -v psql &> /dev/null && [ -z "$USE_DOCKER" ]; then
-    DOMAIN_COUNT=$(exec_sql "SELECT COUNT(*) FROM trusted_domains;" | grep -E '^\s*[0-9]+' | xargs)
-else
-    DOMAIN_COUNT=$(exec_sql_docker "SELECT COUNT(*) FROM trusted_domains;" | grep -E '^\s*[0-9]+' | xargs)
-fi
+DOMAIN_COUNT=$(exec_sql "SELECT COUNT(*) FROM trusted_domains;" | grep -E '^\s*[0-9]+' | xargs)
 
 echo -e "${GREEN}  Total trusted domains: $DOMAIN_COUNT${NC}\n"
 
@@ -151,11 +150,7 @@ echo -e "${BLUE}========================================${NC}\n"
 echo -e "Next steps:"
 echo -e "1. ${YELLOW}Test the API:${NC} bash scripts/qa-tests.sh"
 echo -e "2. ${YELLOW}View trusted domains:${NC}"
-if command -v psql &> /dev/null && [ -z "$USE_DOCKER" ]; then
-    echo -e "   psql -h $PUBLIC_DB_HOST -p $PUBLIC_DB_PORT -U $PUBLIC_DB_USER -d $PUBLIC_DB_NAME -c 'SELECT * FROM trusted_domains;'"
-else
-    echo -e "   docker-compose exec timescaledb psql -U postgres -d consentvault -c 'SELECT * FROM trusted_domains;'"
-fi
+echo -e "   $DOCKER_COMPOSE_CMD exec timescaledb psql -U postgres -d consentvault -c 'SELECT * FROM trusted_domains;'"
 echo -e "3. ${YELLOW}View API keys:${NC} curl -H \"Authorization: Bearer <admin_token>\" $BASE_URL/api/v1/admin/api-keys\n"
 
 exit 0

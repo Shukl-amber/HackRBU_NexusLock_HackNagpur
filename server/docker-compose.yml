@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   timescaledb:
     image: timescale/timescaledb:2.13.0-pg15
@@ -11,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: consentvault
     volumes:
-      - timescaledb_data:/var/lib/postgresql/data
+      - ./docker_data/timescaledb:/var/lib/postgresql/data
     networks:
       - consentvault-network
     healthcheck:
@@ -31,7 +29,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: consentvault_private
     volumes:
-      - postgres_private_data:/var/lib/postgresql/data
+      - ./docker_data/postgres_private:/var/lib/postgresql/data
     networks:
       - consentvault-network
     healthcheck:
@@ -47,7 +45,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - ./docker_data/redis:/data
     networks:
       - consentvault-network
     healthcheck:
@@ -57,13 +55,29 @@ services:
       retries: 5
     restart: unless-stopped
 
-volumes:
-  timescaledb_data:
-    driver: local
-  postgres_private_data:
-    driver: local
-  redis_data:
-    driver: local
+  server:
+    build: .
+    container_name: consentvault-server
+    ports:
+      - "8000:8000"
+    environment:
+      - PUBLIC_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@timescaledb:5432/consentvault
+      - PRIVATE_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-private:5432/consentvault_private
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-min-32-characters-long-here}
+      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY:-your-master-key-min-32-characters-long-here}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-change-this-password}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      postgres-private:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - consentvault-network
+    restart: unless-stopped
 
 networks:
   consentvault-network:

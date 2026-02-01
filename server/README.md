@@ -84,38 +84,33 @@ cp .env.example .env
 
 ### 2. Start Services
 
-**Linux/macOS:**
+**WSL / Linux:**
+
+We recommend running the automated setup script which handles environment variables, Docker containers, and initial migrations:
+
 ```bash
-# Start all services (TimescaleDB, PostgreSQL, Redis)
-docker-compose up -d
-
-# Wait for databases to initialize (20-30 seconds)
-sleep 30
-
-# Run migrations
-docker-compose exec timescaledb psql -U postgres -d consentvault -c "SELECT 1;"  # Test public DB
-docker-compose exec postgres-private psql -U postgres -d consentvault_private -c "SELECT 1;"  # Test private DB
-alembic upgrade head
-
-# Start FastAPI server
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# Run the setup script (recommended for WSL/Linux)
+bash scripts/setup-windows.sh
 ```
 
-**Windows (PowerShell):**
-```powershell
-# Start all services
-docker-compose up -d
+**Alternative Manual Setup:**
 
-# Wait for databases to initialize
-Start-Sleep -Seconds 30
+If you prefer manual steps:
 
-# Run migrations
-docker-compose exec timescaledb psql -U postgres -d consentvault -c "SELECT 1;"
-docker-compose exec postgres-private psql -U postgres -d consentvault_private -c "SELECT 1;"
-alembic upgrade head
+```bash
+### 1. Start all services (including the API server)
+docker compose up -d --build
 
-# Start FastAPI server
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+### 2. Run database migrations
+docker compose exec server alembic upgrade head
+
+### 3. Seed initial data (trusted domains & API keys)
+bash scripts/seed-data.sh
+
+### 4. Access the API
+- **Base URL:** [http://localhost:8000](http://localhost:8000)
+- **Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health:** [http://localhost:8000/health](http://localhost:8000/health)
 ```
 
 ### 3. Verify Installation
@@ -125,7 +120,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 curl http://localhost:8000/health
 
 # Expected output:
-# {"status":"healthy","public_db":"connected","private_db":"connected","redis":"connected"}
+# {"status":"healthy","databases":{"public":"connected","private":"connected"},"redis":"connected"}
 ```
 
 ### 4. Seed Initial Data (Optional)
@@ -202,8 +197,10 @@ GET /health
 # Response:
 {
   "status": "healthy",
-  "public_db": "connected",
-  "private_db": "connected",
+  "databases": {
+    "public": "connected",
+    "private": "connected"
+  },
   "redis": "connected"
 }
 ```
@@ -427,18 +424,14 @@ Authorization: Bearer <admin_jwt_token>
 
 ### Running Migrations
 
+Migrations should be run inside the `server` container:
+
 ```bash
-# Create new migration
-alembic revision --autogenerate -m "description"
-
 # Apply migrations
-alembic upgrade head
-
-# Rollback one migration
-alembic downgrade -1
+docker compose exec server alembic upgrade head
 
 # Check migration status
-alembic current
+docker compose exec server alembic current
 ```
 
 **Important:** Migrations automatically detect which database they're running against and only execute relevant changes.
@@ -536,14 +529,14 @@ docker-compose logs -f app  # If running via docker-compose
 **Solution:**
 ```bash
 # Create databases manually
-docker-compose exec timescaledb psql -U postgres -c "CREATE DATABASE consentvault;"
-docker-compose exec postgres-private psql -U postgres -c "CREATE DATABASE consentvault_private;"
+docker compose exec timescaledb psql -U postgres -c "CREATE DATABASE consentvault;"
+docker compose exec postgres-private psql -U postgres -c "CREATE DATABASE consentvault_private;"
 
 # Enable TimescaleDB extension
-docker-compose exec timescaledb psql -U postgres -d consentvault -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
+docker compose exec timescaledb psql -U postgres -d consentvault -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
 
-# Retry migration
-alembic upgrade head
+# Run migration via server container
+docker compose exec server alembic upgrade head
 ```
 
 ### Issue: Redis connection refused
@@ -551,13 +544,13 @@ alembic upgrade head
 **Solution:**
 ```bash
 # Check Redis status
-docker-compose ps redis
+docker compose ps redis
 
 # Restart Redis
-docker-compose restart redis
+docker compose restart redis
 
 # Verify connectivity
-redis-cli -h localhost -p 6379 ping  # Should return PONG
+docker compose exec redis redis-cli ping  # Should return PONG
 ```
 
 ### Issue: `/admin/login` returns 401 with correct credentials
